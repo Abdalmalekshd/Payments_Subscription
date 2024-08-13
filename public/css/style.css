@@ -1,0 +1,121 @@
+.planscards .selected {
+    background-color: #007bbd;
+    border-color: #007bbd;
+    color: white;
+}
+
+
+.btn-custom {
+    background-color: #0096db;
+    color: #fff;
+}
+.btn-custom:hover {
+    background-color: #007bbd;
+}
+
+
+
+.sidebar{
+    background-color: rgba(0,0,0,.125);
+    height: 400px;
+    border-radius: 3px;
+}
+
+
+.sidebar .nav-header{
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.sidebar .nav{
+margin-top: 20px;
+}
+
+.navbar .navbar-nav{
+    margin-top: 20px;
+    }
+
+.nav-link.active {
+    background-color: #007bff;
+    color: white;
+}
+
+
+.card-body  span.selected{
+    background-color:rgb(8, 106, 245);
+
+    }
+
+
+
+.card-body .span{
+background-color:rgb(111, 115, 127);
+color: white;
+padding: 10px;
+margin-top: 5px;
+border-top-left-radius: 3px;
+border-bottom-left-radius: 3px;
+}
+
+
+
+    .card-body .span:last-child{
+        border-top-left-radius: 0px;
+        border-bottom-left-radius: 0px;
+        border-top-right-radius: 3px;
+        border-bottom-right-radius: 3px;
+
+    }
+
+
+    .span {
+        cursor: pointer;
+        padding: 5px 10px;
+    }
+
+    .span input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .datacontainer .datarow{
+        border: 0.5px solid  rgb(194, 194, 194);
+        padding: 10px;
+    }
+
+    .card-body .TITLE{
+        font-size: 25px;
+    }
+
+
+.card-plan {
+    border: 1px solid blue;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+}
+
+.plan-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.plan-body {
+    padding: 15px;
+    text-align: center;
+}
+
+
+
+@media (max-width: 767.98px) {
+    .navbar-collapse {
+        flex-direction: column;
+    }
+    .nav-link {
+        padding-left: 1rem !important;
+    }
+}
