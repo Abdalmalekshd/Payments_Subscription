@@ -48,6 +48,8 @@ class AccountController extends Controller
 
         try {
             // Retrieve customer details
+            if(Auth::user()->subscriptionplan){
+
              $customerId=User::find(Auth::user()->id)->stripe_id;
 
             $customer = $stripe->customers->retrieve($customerId);
@@ -83,8 +85,10 @@ class AccountController extends Controller
                 ];
             }
 
-
             return view('Update_Payments',$data);
+        }
+
+        return view('Update_Payments');
 
         } catch (\Stripe\Exception\ApiErrorException $e) {
 

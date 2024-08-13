@@ -26,13 +26,13 @@
 
 
                    <div class="container datacontainer">
-
+                    @if(Auth::user()->subscriptionplan)
                     <div class="row datarow">
                         <div class="col-md-9">
                             <span>Used Email:</span>
                         </div>
                         <div class="col-md-3">
-                            <span>{{ $response['email'] }}</span>
+                            <span></span>
                         </div>
                     </div>
 
@@ -41,7 +41,7 @@
                             <span>Payment Method:</span>
                         </div>
                         <div class="col-md-3">
-                            <span>{{$response['payment_method'] }}</span>
+                            <span></span>
                         </div>
                     </div>
 
@@ -52,7 +52,7 @@
                             <span>Card Brand:</span>
                         </div>
                         <div class="col-md-3">
-                            <span>{{ $response['card_brand'] }}</span>
+                            <span></span>
                         </div>
                     </div>
 
@@ -62,7 +62,7 @@
                             <span>Cards Ends with:</span>
                         </div>
                         <div class="col-md-3">
-                            <span>{{ $response['card_last4'] }}</span>
+                            <span></span>
                         </div>
                     </div>
 
@@ -71,12 +71,63 @@
                             <span>Cards Expiration Date:</span>
                         </div>
                         <div class="col-md-3">
-                            <span>{{ $response['card_expiration'] }}</span>
+                            <span></span>
                         </div>
                     </div>
 
                    </div>
 
+                   @else
+                   <div class="row datarow">
+                    <div class="col-md-9">
+                        <span>Used Email:</span>
+                    </div>
+                    <div class="col-md-3">
+                        <span></span>
+                    </div>
+                </div>
+
+                <div class="row datarow">
+                    <div class="col-md-9">
+                        <span>Payment Method:</span>
+                    </div>
+                    <div class="col-md-3">
+                        <span></span>
+                    </div>
+                </div>
+
+
+
+                <div class="row datarow">
+                    <div class="col-md-9">
+                        <span>Card Brand:</span>
+                    </div>
+                    <div class="col-md-3">
+                        <span></span>
+                    </div>
+                </div>
+
+
+                <div class="row datarow">
+                    <div class="col-md-9">
+                        <span>Cards Ends with:</span>
+                    </div>
+                    <div class="col-md-3">
+                        <span></span>
+                    </div>
+                </div>
+
+                <div class="row datarow">
+                    <div class="col-md-9">
+                        <span>Cards Expiration Date:</span>
+                    </div>
+                    <div class="col-md-3">
+                        <span></span>
+                    </div>
+                </div>
+
+               </div>
+        @endif
 
 
                     <div class="row">

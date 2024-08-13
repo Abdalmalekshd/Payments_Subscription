@@ -25,7 +25,7 @@ class PaymentController extends Controller
                 try {
                     // Retrieve plan from database
                     $plan = Plan::findOrFail($plan_id);
-
+                    if($plan){
                     // Set Stripe secret key
                     Stripe::setApiKey(env('STRIPE_SECRET'));
 
@@ -66,6 +66,9 @@ class PaymentController extends Controller
                     ]);
 
                     return redirect()->away($session->url);
+                }else{
+                    return redirect()->back();
+                }
 
                 } catch (\Stripe\Exception\InvalidRequestException $e) {
                     return redirect()->route('home')->withErrors('Invalid request to Stripe: ' . $e->getMessage());

@@ -33,8 +33,8 @@
                     </div>
                     <div class="text-center">
 
-
-                        @if (Auth::user()->subscriptionplan->status === 'paused')
+                        @if(Auth::user()->subscriptionplan)
+                        @if (Auth::user()->subscriptionplan->status === 'paused' ?? '')
                         <button onclick="event.preventDefault(); document.getElementById('resume-form').submit();" class="btn btn-custom">
                             Resume Subscription
                         </button>
@@ -50,6 +50,11 @@
                         </form>
                     @endif
 
+                    @else
+                    <button  class="btn btn-custom">
+                        Pause Subscription
+                    </button>
+                        @endif
                     </div>
                     <hr>
                     <div class="row">
@@ -70,8 +75,6 @@
                         <form method="POST" action="{{ route('cancel.subscription') }}">
                             @csrf
                     <div class="text-center">
-
-
                         <input type="submit" value="Cancel Subscription" class="btn btn-custom">
                     </div>
                 </form>
