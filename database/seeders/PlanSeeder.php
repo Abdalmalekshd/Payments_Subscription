@@ -17,13 +17,21 @@ class PlanSeeder extends Seeder
 
 
         $data=[
-          [  'plan_name' =>'Basic',
-            'plan_price' =>30,
-            'plan_features' =>json_encode(['3 Invoices per day','1 Sending per day','0 Upload invoices']),
+          [
+            'name'                  => 'Basic'
+            , 'monthly_price_id'    =>"price_1PlJPDGWolDHikV5DxiGvQUQ"
+            , 'yearly_price_id'     =>"price_1PlJPDGWolDHikV581nAapiJ"
+            , 'monthly_price'       =>10
+            , 'yearly_price'        =>120
+            , 'features'            =>json_encode(["3 Invoices per day","1 Sending per day","0 Upload invoices"]),
         ],
-        [  'plan_name' =>'Pro',
-        'plan_price' =>10,
-        'plan_features' =>json_encode(['Unlimited Invoices','Unlimited Sending','Upload invoices']),
+        [
+            'name'                  =>'Pro',
+            'monthly_price_id'      =>"price_1PlJPDGWolDHikV5DxiGvQUQ",
+            'yearly_price_id'       =>"price_1PlJPDGWolDHikV581nAapiJ",
+            'monthly_price'         =>30,
+            'yearly_price'          =>360,
+            'features'              =>json_encode(['Unlimited Invoices','Unlimited Sending','Upload invoices']),
 
     ],
         ];
