@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UserRequest;
 use App\Models\Plan;
 use App\Models\User;
-use Hash;
-use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Http\Request;
+use Stripe\Stripe;
+use Stripe\PaymentIntent;
 use Illuminate\Support\Facades\Auth;
 use Stripe\StripeClient;
 
@@ -101,7 +101,26 @@ class AccountController extends Controller
 
 
 
+    public function receipts(){
+        Stripe::setApiKey(config('services.stripe.sk'));
 
+
+        $customerStripeId=Auth::user()->stripe_id;
+
+        $payments = PaymentIntent::all(['customer' => $customerStripeId]);
+
+        $paymentData = [];
+        foreach ($payments->data as $payment) {
+            $paymentData[] = [
+                'amount' => number_format($payment->amount / 100, 2),
+                'currency' => strtoupper($payment->currency),
+                'status' => $payment->status,
+            ];
+        }
+
+        return view('receipts', ['payments' => $paymentData]);
+
+    }
 
 
     public function cancel_sub(){

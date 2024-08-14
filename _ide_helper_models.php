@@ -13,6 +13,29 @@
 
 namespace App\Models{
 /**
+ * App\Models\Admin
+ *
+ * @property int $id
+ * @property string $name
+ * @property string $email
+ * @property string $password
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|Admin newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Admin newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Admin query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Admin whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Admin whereEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Admin whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Admin whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Admin wherePassword($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Admin whereUpdatedAt($value)
+ */
+	class Admin extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
  * App\Models\Plan
  *
  * @property int $id
@@ -52,24 +75,25 @@ namespace App\Models{
  * @property string $stripe_price_id
  * @property string $status
  * @property int $plan_id
- * @property string|null $start_date
- * @property string|null $end_date
+ * @property string $plan_type
  * @property string|null $current_period_start
  * @property string|null $current_period_end
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Plan $Plan
  * @property-read \App\Models\User $User
+ * @property-read mixed $current_period_end_formatted
+ * @method static \Illuminate\Database\Eloquent\Builder|Subscription active()
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Subscription notActive()
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription query()
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription whereCurrentPeriodEnd($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription whereCurrentPeriodStart($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Subscription whereEndDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription wherePlanId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Subscription whereStartDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Subscription wherePlanType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription whereStripePriceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription whereSubscriptionId($value)

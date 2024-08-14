@@ -4,7 +4,7 @@ use App\Http\Controllers\AccountController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ShopifyController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\StripeWebhookController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -47,6 +47,7 @@ Route::post('updateAccount',[AccountController::class,'UpdateAccount'])->name('U
 
 Route::get('subscriptions',[AccountController::class,'subscriptions'])->name('subscriptions');
 
+Route::get('receipts',[AccountController::class,'receipts'])->name('receipts');
 
 
 Route::get('update_payments',[AccountController::class,'update_payments'])->name('update_payments');

@@ -18,7 +18,7 @@
                         <a class="nav-link" href="{{ route('home') }}">ACCOUNT</a>
                         <a class="nav-link active" href="{{ route('subscriptions') }}">SUBSCRIPTIONS</a>
                         <a class="nav-link" href="{{ route('update_payments') }}">UPDATE PAYMENT</a>
-                        <a class="nav-link" href="#">RECEIPTS</a>
+                        <a class="nav-link" href="{{ route('receipts') }}">RECEIPTS</a>
                         <a class="nav-link" href="{{ route('cancel_sub') }}">CANCEL SUBSCRIPTION</a>
                     </nav>
                 </div>
@@ -26,7 +26,7 @@
                     <div class="mb-4">
                         <h2>Your Subscription Plan is:{{Auth::user()->subscriptionplan->plan->name ?? ''}}</h2>
                         <p>@if (Auth::user()->subscriptionplan)
-                            Your subscription will next renew on {{Auth::user()->subscriptionplan->current_period_end}} for {{Auth::user()->subscriptionplan->plan->yearly_price}}$.
+                            Your subscription will next renew on {{ Auth::user()->subscriptionplan->current_period_end_formatted}} for {{ Auth::user()->subscriptionplan->plan_type === 'year' ? Auth::user()->subscriptionplan->plan->yearly_price : Auth::user()->subscriptionplan->plan->monthly_price  }}$.
                         @endif</p>
                     </div>
                     <div class="row">
