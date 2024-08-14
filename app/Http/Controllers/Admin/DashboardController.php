@@ -58,4 +58,15 @@ class DashboardController extends Controller
 
         return view('admin.ManageUsers',$data);
      }
+
+
+     public function Deleteuser($id){
+        $user=User::find($id);
+        if($user)
+        {
+            $user->delete();
+        }
+        return redirect()->back();
+     }
+
 }

@@ -26,6 +26,7 @@ Route::group(['namespace'=>'App\Http\Controllers\Admin','middleware'=>'auth:admi
     Route::get('manage_users','DashboardController@manageusers')->name('manage.users');
 
 
+    Route::get('delete_users/{id}','DashboardController@Deleteuser')->name('delete.user');
 
 
 });

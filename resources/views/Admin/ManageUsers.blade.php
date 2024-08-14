@@ -43,9 +43,9 @@
                             <tr>
                                 <td>{{ $user->name }}</td>
                                 <td>{{ $user->email }}</td>
-                                <td>{{ $user->subscriptionplan->plan->name }}</td>
-                                <td>{{ $user->subscriptionplan->plan_type }}</td>
-                                <td><a href="" class="btn btn-danger">DELETE</a></td>
+                                <td>{{ $user->subscriptionplan->plan->name ?? 'This User Doe\'s Not Have Subscription Yet'}}</td>
+                                <td>{{ $user->subscriptionplan->plan_type ?? ''}}</td>
+                                <td><a href="{{ route('delete.user',$user->id) }}" class="btn btn-danger">DELETE</a></td>
                             </tr>
                         @endforeach
                         @else
