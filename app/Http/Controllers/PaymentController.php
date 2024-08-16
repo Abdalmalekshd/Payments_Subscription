@@ -146,9 +146,9 @@ class PaymentController extends Controller
 
 
 
-                return redirect()->route('subscriptions')->with('success', 'Subscription successfully updated!');
+                return redirect()->route('subscriptions')->with(['success'=> 'Subscription successfully updated!']);
             } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Something went wrong please try agian later');
+                return redirect()->back()->with(['error'=> 'Something went wrong please try agian later']);
 
                return redirect()->route('subscriptions')->withErrors('An error occurred: ' . $e->getMessage());
             }
@@ -195,10 +195,10 @@ class PaymentController extends Controller
                     // Update the subscription status in your database
                     $subscription->status = 'canceled';
                     $subscription->save();
-                    return redirect()->back()->with('success', 'Your subscription has been canceled and a refund has been processed.');
+                    return redirect()->back()->with(['success'=> 'Your subscription has been canceled and a refund has been processed.']);
 
                 } catch (\Exception $e) {
-                    return redirect()->back()->with('error', 'Something went wrong please try agian later');
+                    return redirect()->back()->with(['error'=> 'Something went wrong please try agian later']);
 
                     return redirect()->back()->withErrors('Failed to process refund: ' . $e->getMessage());
                 }

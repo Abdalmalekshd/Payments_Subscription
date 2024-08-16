@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UserRequest;
 use App\Models\Plan;
 use App\Models\User;
+use Hash;
 use Illuminate\Http\Request;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
 use Illuminate\Support\Facades\Auth;
+use Log;
+use Session;
 use Stripe\StripeClient;
 
 class AccountController extends Controller
@@ -23,14 +26,22 @@ class AccountController extends Controller
 
 
     public function UpdateAccount(UserRequest $req){
+        $user = User::find($req->id);
 
-        $user=User::find(Auth::user()->id);
+        if ($user && $req->id == Auth::user()->id) {
+            $user->name = $req->name;
+            $user->email = $req->email;
+            $user->password = Hash::make($req->password);
 
-        $user->name = $req->name;
-        $user->email=$req->email;
             $user->save();
 
-        return redirect()->route('home')->with('success', 'User account updated successfully');
+
+            Auth::guard()->login($user);
+
+
+
+            return redirect()->route('home')->with(['success' => 'User account updated successfully']);
+        }
 
 
     }

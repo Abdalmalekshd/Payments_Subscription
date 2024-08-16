@@ -1,4 +1,5 @@
 @extends('Layout.UserMaster')
+@section('Title','Subscription Page')
 
 @section('content')
 

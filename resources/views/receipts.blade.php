@@ -1,5 +1,7 @@
 @extends('Layout.UserMaster')
 
+@section('Title','Receipts')
+
 @section('content')
 
 

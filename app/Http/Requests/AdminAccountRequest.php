@@ -2,12 +2,9 @@
 
 namespace App\Http\Requests;
 
-use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Validation\ValidationException;
 
-class UserRequest extends FormRequest
+class AdminAccountRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,21 +23,12 @@ class UserRequest extends FormRequest
      */
     public function rules()
     {
-
-
-
         return [
-            'id'        =>'exists:users,id',
-            'name'      => 'required|min:3|max:15',
+            'id'        =>'exists:admins,id',
+            'name'      => 'required|min:3',
             'email'     => 'required|email',
             'password'  =>'required_without:id',
 
-
-
         ];
-
     }
-
-
-
 }

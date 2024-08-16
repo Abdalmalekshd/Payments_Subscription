@@ -17,6 +17,13 @@
 
             </li>
 
+
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('admin.settings') }}">Settings</a>
+
+
+            </li>
+
         </ul>
     </div>
 </nav>

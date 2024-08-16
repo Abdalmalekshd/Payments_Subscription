@@ -1,5 +1,5 @@
 @extends('Admin.Layout.AdminMaster')
-
+@section('Title','Dashboard')
 @section('content')
 
 <div class="container mt-5">
@@ -15,7 +15,8 @@
                         <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
                         <a class="nav-link" href="{{ route('manage.subs') }}">MANAGE SUBSCRIPTIONS</a>
                         <a class="nav-link" href="{{ route('manage.users') }}">MANAGE USERS</a>
-                        <a class="nav-link" href="#">SETTINGS</a>
+                        <a class="nav-link active" href="{{ route('admin.settings') }}">Settings</a>
+
                     </nav>
                 </div>
 
@@ -73,7 +74,7 @@
                                 <td>{{ $user->name }}</td>
                                 <td>{{ $user->email }}</td>
                                 <td>{{ $user->subscriptionplan->plan->name ??'This User Doe\'s Not Have Subscription Yet' }}</td>
-                                <td>{{ $user->subscriptionplan->plan_type ??'' }}</td>
+                                <td>{{ $user->subscriptionplan->plan_type ?? '' }}</td>
                                 <td><a href="{{ route('delete.user',$user->id) }}" class="btn btn-danger">DELETE</a></td>
                             </tr>
                         @endforeach

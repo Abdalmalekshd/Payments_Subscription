@@ -1,75 +1,103 @@
 <?php
 
-use App\Http\Controllers\AccountController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ShopifyController;
-use App\Http\Controllers\PaymentController;
+    use App\Http\Controllers\AccountController;
+    use Illuminate\Support\Facades\Route;
+    use App\Http\Controllers\ShopifyController;
+    use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProductsController;
 
+    Route::group(['namespace'=>'App\Http\Controllers','middleware'=>'guest:web'],function(){
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
-
-
-Route::group(['namespace'=>'App\Http\Controllers','middleware'=>'guest:web'],function(){
-
-    //Start Login Route
+    //Start SignUp Routes
 
     Route::get('signup','LoginController@signup')->name('user.signup');
 
     Route::post('user_signup','LoginController@usersignup')->name('user.createacc');
+    //End SignUp Routes
 
+
+    //Start Login Routes
 
     Route::get('login','LoginController@login')->name('login');
 
     Route::post('user_Login','LoginController@userlogin')->name('user.signin');
 
-
-
-
-    //End Login Route
-
-
-});
-
-Route::get('/auth/shopify', [ShopifyController::class, 'redirectToShopify'])->name('shopify.auth');
-
-Route::get('/auth/shopify/callback', [ShopifyController::class, 'handleShopifyCallback'])->name('shopify.callback');
-
-
-Route::group(['middleware' => ['auth:web']],function(){
-
-Route::get('account',[AccountController::class,'account'])->name('home');
-
-Route::post('updateAccount',[AccountController::class,'UpdateAccount'])->name('UpdateAccount');
-
-
-Route::get('subscriptions',[AccountController::class,'subscriptions'])->name('subscriptions');
-
-Route::get('receipts',[AccountController::class,'receipts'])->name('receipts');
-
-
-Route::get('update_payments',[AccountController::class,'update_payments'])->name('update_payments');
+    //End Login Routes
 
 
 
 
-Route::get('cancel_sub',[AccountController::class,'cancel_sub'])->name('cancel_sub');
+
+    });
+    //Start Shopify Routes
+
+    Route::get('/auth/shopify', [ShopifyController::class, 'redirectToShopify'])->name('shopify.auth');
+
+    Route::get('/auth/shopify/callback', [ShopifyController::class, 'handleShopifyCallback'])->name('shopify.callback');
+
+    //End Shopify Routes
+
+
+    Route::group(['middleware' => ['auth:web']],function(){
+
+
+        Route::get('products',[ProductsController::class,'products'])->name('home');
+
+
+    //Start Account Routes
+
+    Route::get('account',[AccountController::class,'account'])->name('account');
+
+    Route::post('updateAccount',[AccountController::class,'UpdateAccount'])->name('UpdateAccount');
+    //End Account Routes
+
+    //Start subscriptions Routes
+
+    Route::get('subscriptions',[AccountController::class,'subscriptions'])->name('subscriptions');
+    //End subscriptions Routes
+
+
+    //Start receipts Routes
+
+    Route::get('receipts',[AccountController::class,'receipts'])->name('receipts');
+
+    //End receipts Routes
 
 
 
-Route::post('/checkout', [PaymentController::class,'checkout'])->name('process.payment');
+    //Start update payments Routes
 
-Route::get('success_url',  [PaymentController::class,'success'])->name('success');
+    Route::get('update_payments',[AccountController::class,'update_payments'])->name('update_payments');
 
-Route::get('cancel_url',[PaymentController::class,'cancel'])->name('cancel');
-
-
-Route::post('cancel_subscription',[PaymentController::class,'cancel_subscription'])->name('cancel.subscription');
-
-Route::post('/subscription/pause', [PaymentController::class, 'pause'])->name('subscription.pause');
-Route::post('/subscription/resume', [PaymentController::class, 'resume'])->name('subscription.resume');
+    //End update payments Routes
 
 
-});
+    //Start cancel sub Routes
+
+    Route::get('cancel_sub',[AccountController::class,'cancel_sub'])->name('cancel_sub');
+    //End cancel sub Routes
+
+
+    //Start Stripe Payment Routes
+
+    Route::post('/checkout', [PaymentController::class,'checkout'])->name('process.payment');
+
+    Route::get('success_url',  [PaymentController::class,'success'])->name('success');
+
+    Route::get('cancel_url',[PaymentController::class,'cancel'])->name('cancel');
+
+    //End Stripe Payment Routes
+
+
+    //Start Cancel && Pause && Resume subscription Routes
+
+    Route::post('cancel_subscription',[PaymentController::class,'cancel_subscription'])->name('cancel.subscription');
+
+    Route::post('/subscription/pause', [PaymentController::class, 'pause'])->name('subscription.pause');
+    Route::post('/subscription/resume', [PaymentController::class, 'resume'])->name('subscription.resume');
+
+
+    //End Cancel && Pause && Resume subscription Routes
+
+
+    });

@@ -28,45 +28,4 @@ class DashboardController extends Controller
 
 
 
-    public function managesubs(){
-
-        $data=[];
-        $data['Subs']=Subscription::with('User','Plan')->get();
-
-
-
-
-
-
-
-        return view('admin.ManageSubs',$data);
-     }
-
-
-
-
-    public function manageusers(){
-
-        $data=[];
-        $data['Users']=User::get();
-
-
-
-
-
-
-
-        return view('admin.ManageUsers',$data);
-     }
-
-
-     public function Deleteuser($id){
-        $user=User::find($id);
-        if($user)
-        {
-            $user->delete();
-        }
-        return redirect()->back();
-     }
-
 }

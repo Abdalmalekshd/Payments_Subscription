@@ -1,5 +1,7 @@
 @extends('Admin.Layout.AdminMaster')
 
+@section('Title','Manage Users')
+
 @section('content')
 
 <div class="container mt-5">
@@ -15,7 +17,8 @@
                         <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
                         <a class="nav-link" href="{{ route('manage.subs') }}">MANAGE SUBSCRIPTIONS</a>
                         <a class="nav-link" href="{{ route('manage.users') }}">MANAGE USERS</a>
-                        <a class="nav-link" href="#">SETTINGS</a>
+                        <a class="nav-link active" href="{{ route('admin.settings') }}">Settings</a>
+
                     </nav>
                 </div>
 

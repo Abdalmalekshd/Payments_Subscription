@@ -1,4 +1,5 @@
 @extends('Layout.UserMaster')
+@section('Title','Account')
 
 @section('content')
 @include('Layout.SuccessMessage')
@@ -29,6 +30,7 @@
                     <form action="{{ route('UpdateAccount') }}" method="POST" class="form-group">
                         @csrf
                         <div class="row mb-3">
+                            <input type="hidden" name="id" value="{{ Auth::user()->id }}" readonly>
                             <div class="col-md-6">
                                 <label for="name" class="form-label">Name</label>
                                 <input type="text" value="{{ $user->name }}" name="name" id="name" class="form-control">

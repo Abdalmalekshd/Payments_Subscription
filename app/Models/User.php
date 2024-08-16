@@ -47,4 +47,11 @@ class User extends Authenticatable
     public function subscriptionplan(){
         return $this->hasOne(Subscription::class);
         }
+
+
+
+
+    public function User_UserProduct(){
+        return $this->hasMany(User_Product::class);
+        }
 }
