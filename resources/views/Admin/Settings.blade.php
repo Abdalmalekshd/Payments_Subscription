@@ -17,7 +17,7 @@
                         <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
                         <a class="nav-link" href="{{ route('manage.subs') }}">Manage Subscriptions</a>
                         <a class="nav-link" href="{{ route('manage.users') }}">Manage Users</a>
-                        <a class="nav-link active" href="{{ route('admin.settings') }}">Settings</a>
+                        <a class="nav-link" href="{{ route('admin.settings') }}">Settings</a>
                     </nav>
                 </div>
 

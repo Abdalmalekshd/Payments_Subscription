@@ -6,7 +6,7 @@
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('home') }}">ACCOUNT</a>
+                <a class="nav-link" href="{{ route('account') }}">ACCOUNT</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('subscriptions') }}">SUBSCRIPTIONS</a>

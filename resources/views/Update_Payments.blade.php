@@ -16,7 +16,7 @@
                 <div class="col-md-3 d-none d-md-block sidebar">
                     <h5 class="nav-header">NAVIGATION</h5>
                     <nav class="nav flex-column">
-                        <a class="nav-link" href="{{ route('home') }}">ACCOUNT</a>
+                        <a class="nav-link" href="{{ route('account') }}">ACCOUNT</a>
                         <a class="nav-link" href="{{ route('subscriptions') }}">SUBSCRIPTIONS</a>
                         <a class="nav-link" href="{{ route('update_payments') }}">UPDATE PAYMENT</a>
                         <a class="nav-link" href="{{ route('receipts') }}">RECEIPTS</a>

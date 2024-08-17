@@ -1,10 +1,12 @@
 <?php
 
     use App\Http\Controllers\AccountController;
-    use Illuminate\Support\Facades\Route;
+    use App\Http\Controllers\SubscribePurchaseController;
+use Illuminate\Support\Facades\Route;
     use App\Http\Controllers\ShopifyController;
     use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\PurchaseController;
 
     Route::group(['namespace'=>'App\Http\Controllers','middleware'=>'guest:web'],function(){
 
@@ -27,7 +29,6 @@ use App\Http\Controllers\ProductsController;
 
 
 
-
     });
     //Start Shopify Routes
 
@@ -41,8 +42,27 @@ use App\Http\Controllers\ProductsController;
     Route::group(['middleware' => ['auth:web']],function(){
 
 
-        Route::get('products',[ProductsController::class,'products'])->name('home');
+        //Start Products And Purchases Routes
+    Route::get('products',[ProductsController::class,'products'])->name('home');
 
+
+    //Start Purchase For  Once Routes
+    Route::post('/Payment_For_One_Time/{id}', [PurchaseController::class,'PurchaseProductForOnce'])->name('Purchase.For.Once');
+
+    Route::get('success_Purchase_For_Once',  [PurchaseController::class,'PurchaseProductForOnceSuccess'])->name('Purchase.For.Once.Success');
+
+    Route::get('cancel_Purchase_For_Once',[PurchaseController::class,'PurchaseProductForOnceCancel'])->name('Purchase.For.Once.Cancel');
+    //End Purchase For  Once Routes
+    
+    //Start Subscribe Purchase  Routes
+    Route::post('/Subscribe_Purchase/{id}', [SubscribePurchaseController::class,'SubscribePurchaseProduct'])->name('Subscribe.Purchase');
+
+    Route::get('success_Subscribe_Purchase',  [SubscribePurchaseController::class,'SubscribePurchaseProductSuccess'])->name('Subscribe.Purchase.Success');
+
+    Route::get('cancel_Subscribe_Purchase',[SubscribePurchaseController::class,'SubscribePurchaseProductCancel'])->name('Subscribe.Purchase.Cancel');
+    //End Subscribe Purchase  Routes
+        
+    //End Products And Purchases Routes
 
     //Start Account Routes
 

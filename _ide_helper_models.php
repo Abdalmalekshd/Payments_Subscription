@@ -67,6 +67,33 @@ namespace App\Models{
 
 namespace App\Models{
 /**
+ * App\Models\Product
+ *
+ * @property int $id
+ * @property string $name
+ * @property string $description
+ * @property string $price
+ * @property string $image
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User_Product> $product_UserProduct
+ * @property-read int|null $product__user_product_count
+ * @method static \Illuminate\Database\Eloquent\Builder|Product newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Product newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Product query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Product whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Product whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Product whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Product whereImage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Product whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Product wherePrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Product whereUpdatedAt($value)
+ */
+	class Product extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
  * App\Models\Subscription
  *
  * @property int $id
@@ -119,6 +146,8 @@ namespace App\Models{
  * @property string|null $pm_type
  * @property string|null $pm_last_four
  * @property string|null $trial_ends_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User_Product> $User_UserProduct
+ * @property-read int|null $user__user_product_count
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
  * @property-read \App\Models\Subscription|null $subscriptionplan
@@ -142,5 +171,30 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|User whereUpdatedAt($value)
  */
 	class User extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\User_Product
+ *
+ * @property int $id
+ * @property int $product_id
+ * @property int $user_id
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Product $Product
+ * @property-read \App\Models\User $User
+ * @method static \Illuminate\Database\Eloquent\Builder|User_Product newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|User_Product newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|User_Product query()
+ * @method static \Illuminate\Database\Eloquent\Builder|User_Product whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User_Product whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User_Product whereProductId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User_Product whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User_Product whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User_Product whereUserId($value)
+ */
+	class User_Product extends \Eloquent {}
 }
 

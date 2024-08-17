@@ -19,6 +19,7 @@ class AdminLoginController extends Controller
          if(auth()->guard('admin')->attempt(['email'=>$request->email,'password'=>$request->password])){
              return redirect()->intended(route('dashboard'));
          }
+
          return redirect()->back()->withInput($request->only('email'));
      }
 }

@@ -6,16 +6,48 @@
     <title>@yield('Title','Admin')</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-<link rel="stylesheet" href="{{ asset('css\style.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <style>
+        .navbar-custom {
+            background-color: rgb(51, 51, 51);
+        }
+
+        .navbar-custom .nav-link {
+            color: white;
+        }
+
+        .full-width-header {
+            width: 100%;
+            height: 108px; /* Fixed height */
+            background-color: rgb(51, 51, 51);
+        }
+
+        @media (max-width: 767px) {
+            .full-width-header {
+                height: auto; /* Adjust height for smaller screens */
+            }
+        }
+    </style>
 </head>
 <body>
 
+    <header class="full-width-header">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg text-light navbar-custom justify-content-center">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="{{route('dashboard')}}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{route('Add.products')}}">Add Products</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('show.products') }}">Products</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-    @include('Admin/Layout/AdminNav')
+    @if (!isset($noNavbar))
+        @include('Admin/Layout/AdminNav')
+    @endif
 
     @yield('content')
-
-
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
