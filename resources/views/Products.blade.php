@@ -89,19 +89,30 @@ $noNavbar = '';
             <div class="modal-body">
                 <ul class="list-group">
                     <li class="list-group-item">
-                        <form action="{{ route('Purchase.For.Once',$product->id) }}" method="POST">
+                        <form id="purchaseForm" method="POST" action="{{ route('Purchase', $product->id) }}">
                             @csrf
-                        <input type="submit" class="btn btn-primary btn-block" value="Buy Now">
-                    </form>
+                            <input type="hidden" name="product_id" id="product_id" value="{{ $product->id }}">
+                            <input type="hidden" name="purchase_type" id="purchase_type">
+                            <div class="form-group">
+                                <label for="purchaseOption">Select Option:</label>
+                                <select class="form-control" id="purchaseOption" name="purchase_type">
+                                    <option value="one_time">Buy Now</option>
+                                    <option value="weekly">Subscribe Weekly</option>
+                                    <option value="monthly">Subscribe Monthly</option>
+                                </select>
+                            </div>
+                            <input type="submit" class="btn btn-primary btn-block" value="Proceed">
+                        </form>
                     </li>
-
-                        <li class="list-group-item"><a href="#" class="btn btn-success btn-block">Subscribe</a></li>
-                    <li class="list-group-item"><a href="#" class="btn btn-danger btn-block">Add to Cart</a></li>
+                    <li class="list-group-item">
+                        <a href="#" class="btn btn-danger btn-block">Add to Cart</a>
+                    </li>
                 </ul>
             </div>
         </div>
     </div>
 </div>
+
 {{-- End Add to Cart Modal --}}
 
 <script>
@@ -113,13 +124,32 @@ $noNavbar = '';
         });
     });
 
+    $('#cartModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget); // Button that triggered the modal
+        var productId = button.data('product-id');
+        
+        // Update hidden fields in the form
+        $('#product_id').val(productId);
+    });
+
+    $('#purchaseOption').on('change', function() {
+        var selectedOption = $(this).val();
+        $('#purchase_type').val(selectedOption);
+    });
+
     $('#productDetailsModal').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget); // Button that triggered the modal
         var title = button.data('title');
-        {{--  var category = button.data('category');  --}}
         var price = button.data('price');
         var description = button.data('description');
         var image = button.data('image');
+
+        var modal = $(this);
+        modal.find('.modal-title').text(title);
+        modal.find('#productTitle').text(title);
+        modal.find('#productPrice').text('Product Price: $' + price);
+        modal.find('#productDescription').text('Product Description: ' + description);
+        modal.find('#productImage').attr('src', image);
 
         var modal = $(this);
         modal.find('.modal-title').text(title);

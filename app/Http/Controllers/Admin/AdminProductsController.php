@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use App\Traits\UplaodImageTraits;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-
+use Stripe\StripeClient;
 class AdminProductsController extends Controller
 {
     use UplaodImageTraits;
@@ -32,7 +32,7 @@ class AdminProductsController extends Controller
 
             $img=$this->UploadImage('products', $req->image);
 
-            $Product=Product::create([
+            $product = new Product([
                 'name' => $req->name,
                 'image'=>$img,
                 'price'=>$req->price,
@@ -40,7 +40,7 @@ class AdminProductsController extends Controller
 
             ]);
 
-
+            $product->createStripePlans();
             DB::commit();
 
             return redirect()->back()->with(['success'=>'New Product Added']);
@@ -48,6 +48,7 @@ class AdminProductsController extends Controller
         }
             catch(\Exception $ex){
 
+                return $ex;
                 DB::rollBack();
 
             return redirect()->back()->with(['error'=>'Error while adding new product']);
@@ -138,7 +139,5 @@ class AdminProductsController extends Controller
     }
 
 }
-
-
 
 }

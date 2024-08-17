@@ -9,8 +9,9 @@ class User_Product extends Model
 {
     use HasFactory;
 
+    public $table='user_products';
 
-    public $fillable=['product_id','user_id','status'];
+    public $fillable=['product_id','user_id','status','purchase_type','subscription_start_date','subscription_end_date'];
 
 
 

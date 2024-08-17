@@ -7,105 +7,113 @@ use App\Models\User_Product;
 use Auth;
 use Illuminate\Http\Request;
 use Stripe\Stripe;
-use Stripe\Checkout\Session;
-
+use Stripe\StripeClient;
 class PurchaseController extends Controller
 {
-    public function PurchaseProductForOnce($id){
-
-
-        $user = Auth::user();
-
-
-        try {
-            $product=Product::find($id);
-
-            Stripe::setApiKey(env('STRIPE_SECRET'));
-
-            $productName = $product->name;
-            $userid = $user->id;
-
-            $totalprice =$product->price;
-            $two0 = "00";
-            $total = "$totalprice$two0";
-
-            $session = Session::create([
-                'line_items'  => [
-                    [
-                        'price_data' => [
-                            'currency'     => 'USD',
-                            'product_data' => [
-                                "name" => $productName,
-
-                            ],
-                            'unit_amount'  => $total,
-                        ],
-                        'quantity'   => 1,
-                    ],
-
-                ],
-                'mode'        => 'payment',
-                'metadata' => [
-                            'user_id' => $user->id,
-                            'Product_id' => $product->id,
-                        ],
-                'success_url' => route('Purchase.For.Once.Success') . '?session_id={CHECKOUT_SESSION_ID}&id=' . $user->id . '&product_id=' . $product->id,
-                'cancel_url'  => route('Purchase.For.Once.Cancel'),
-            ]);
-
-            return redirect()->away($session->url);
-
-
-        } catch (\Stripe\Exception\InvalidRequestException $e) {
-            return redirect()->route('home')->withErrors('Invalid request to Stripe: ' . $e->getMessage());
-        } catch (\Exception $e) {
-            return redirect()->route('home')->withErrors('An error occurred: ' . $e->getMessage());
-        }
-
-
-    }
-
-
-    public function PurchaseProductForOnceSuccess(Request $request)
+    public function SubscribePurchaseProduct($id, Request $req)
     {
-        $userId = $request->get('id');
-        $productId = $request->get('product_id');
-        $sessionId = $request->query('session_id');
-        $TotalPay=$request->total;
-
-
-        // Set Stripe secret key
-        Stripe::setApiKey(env('STRIPE_SECRET'));
-
-        try {
-            // Retrieve the session from Stripe
-            $session = Session::retrieve($sessionId);
-
-            User_Product::create([
-                'user_id'=>$userId,
-                'product_id'=>$productId,
-                'status'=>'Purchase For Once',
-            ]);
-
-
-
-
-
-
-
-
-            return redirect()->route('home')->with(['success'=> 'Product successfully Purchased!']);
-        } catch (\Exception $e) {
-            return redirect()->back()->with(['error'=> 'Something went wrong please try agian later']);
-
-           return redirect()->route('subscriptions')->withErrors('An error occurred: ' . $e->getMessage());
+        $user = Auth::user();
+        $product = Product::find($id);
+        $purchaseType = $req->input('purchase_type'); // 'one_time', 'weekly', 'monthly'
+    
+        if (!$product) {
+            return response()->json(['error' => 'Product not found'], 404);
         }
-
+    
+        // Create Stripe plans if they do not exist
+        $product->createStripePlans();
+    
+        // Get the correct plan ID based on purchase type
+        $priceId = null;
+        switch ($purchaseType) {
+            case 'one_time':
+                $priceId = $product->stripe_one_time_price_id;
+                break;
+            case 'weekly':
+                $priceId = $product->stripe_weekly_price_id;
+                break;
+            case 'monthly':
+                $priceId = $product->stripe_monthly_price_id;
+                break;
+        }
+    
+        if (!$priceId) {
+            return response()->json(['error' => 'Invalid purchase type'], 400);
+        }
+    
+        // Initialize Stripe client
+        Stripe::setApiKey(config('services.stripe.sk'));
+    
+        try {
+            // Create Stripe customer if not exists
+            if (!$user->stripe_id) {
+                $customer = \Stripe\Customer::create([
+                    'email' => $user->email,
+                ]);
+                $user->stripe_id = $customer->id;
+                $user->save();
+            }
+    
+            // Create Checkout Session
+            $session = \Stripe\Checkout\Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => [
+                    [
+                        'price' => $priceId,
+                        'quantity' => 1,
+                    ],
+                ],
+                'mode' => $purchaseType == 'one_time' ? 'payment' : 'subscription',
+                'success_url' => route('Purchase.Success') . '?session_id={CHECKOUT_SESSION_ID}&product_id=' . $product->id . '&status=' . $purchaseType,
+                'cancel_url' => route('Purchase.Cancel'),
+                'customer' => $user->stripe_id,
+            ]);
+    
+            return redirect()->away($session->url);
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
-
-    public function  PurchaseProductForOnceCancel(){
-        return Redirect()->route('home');
+    
+    public function PurchaseProductSuccess(Request $request)
+    {
+        $sessionId = $request->query('session_id');
+        $productId = $request->query('product_id');
+        $status = $request->query('status');
+    
+        $user = Auth::user();
+    
+        // Optionally verify the session here
+        Stripe::setApiKey(config('services.stripe.sk'));
+        $session = \Stripe\Checkout\Session::retrieve($sessionId);
+    
+        // Retrieve the product and user details
+        $product = Product::find($productId);
+    
+        if ($product) {
+            $subscriptionStartDate = now();
+            $subscriptionEndDate = ($status === 'weekly') ? now()->addWeek() : now()->addMonth();
+    
+            // Add record to user_products table
+            $user->User_UserProduct()->updateOrCreate(
+                ['product_id' => $productId],
+                [
+                    'user_id' => $user->id,
+                    'product_id' => $productId,
+                    'status' => ($status === 'one_time') ? 'Purchase For one Time' : 'Subscribe',
+                    'purchase_type' => $status,
+                    'subscription_start_date' => ($status === 'one_time')? null : $subscriptionStartDate ,
+                    'subscription_end_date'   => ($status === 'one_time') ? null : $subscriptionEndDate,
+                ]
+            );
+        }
+    
+        return redirect()->route('home')->with(['success' => 'Product successfully Purchased!']);
     }
+public function PurchaseProductCancel()
+{
+    return redirect()->route('home')->with(['error' => 'Payment was cancelled.']);
+}
 
 
 

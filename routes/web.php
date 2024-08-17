@@ -46,20 +46,13 @@ use App\Http\Controllers\PurchaseController;
     Route::get('products',[ProductsController::class,'products'])->name('home');
 
 
-    //Start Purchase For  Once Routes
-    Route::post('/Payment_For_One_Time/{id}', [PurchaseController::class,'PurchaseProductForOnce'])->name('Purchase.For.Once');
-
-    Route::get('success_Purchase_For_Once',  [PurchaseController::class,'PurchaseProductForOnceSuccess'])->name('Purchase.For.Once.Success');
-
-    Route::get('cancel_Purchase_For_Once',[PurchaseController::class,'PurchaseProductForOnceCancel'])->name('Purchase.For.Once.Cancel');
-    //End Purchase For  Once Routes
     
     //Start Subscribe Purchase  Routes
-    Route::post('/Subscribe_Purchase/{id}', [SubscribePurchaseController::class,'SubscribePurchaseProduct'])->name('Subscribe.Purchase');
+    Route::post('/Subscribe_Purchase/{id}', [PurchaseController::class,'SubscribePurchaseProduct'])->name('Purchase');
 
-    Route::get('success_Subscribe_Purchase',  [SubscribePurchaseController::class,'SubscribePurchaseProductSuccess'])->name('Subscribe.Purchase.Success');
+    Route::get('success_Subscribe_Purchase',  [PurchaseController::class,'PurchaseProductSuccess'])->name('Purchase.Success');
 
-    Route::get('cancel_Subscribe_Purchase',[SubscribePurchaseController::class,'SubscribePurchaseProductCancel'])->name('Subscribe.Purchase.Cancel');
+    Route::get('cancel_Subscribe_Purchase',[PurchaseController::class,'PurchaseProductCancel'])->name('Purchase.Cancel');
     //End Subscribe Purchase  Routes
         
     //End Products And Purchases Routes
