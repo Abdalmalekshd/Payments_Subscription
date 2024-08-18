@@ -41,6 +41,9 @@ Route::group(['middleware'=>['auth:admin'],'prefix'=>'admin'],function(){
     //Start Manage Subscription Routes
 
     Route::get('manage_subscription',[ManageSubsController::class,'managesubs'])->name('manage.subs');
+
+    Route::get('manage_products_subscription',[ManageSubsController::class,'manageProductssubs'])->name('manage.products.subs');
+
     //End Manage Subscription Routes
 
     //Start Manage User Routes

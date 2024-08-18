@@ -23,7 +23,7 @@ class DashboardController extends Controller
 
 
 
-        return view('admin.dashboard',$data);
+        return view('Admin.dashboard',$data);
      }
 
 

@@ -37,7 +37,7 @@ class SettingsController extends Controller
 
             Auth::guard()->login($admin);
 
-            return redirect()->route('admin.settings')->with(['success' => 'Admin account updated successfully']);
+            return redirect()->route('Admin.settings')->with(['success' => 'Admin account updated successfully']);
         }
 
     }

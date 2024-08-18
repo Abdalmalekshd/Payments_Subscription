@@ -33,8 +33,8 @@
                         <thead>
                             <tr>
                                 <th>user_name</th>
-                                <th>Subscription_plan</th>
-                                <th>Subscription_plan_type</th>
+                                <th>Product_name</th>
+                                <th>Subscription_type</th>
                                 <th>Subscription_start_date</th>
                                 <th>Subscription_end_date</th>
                                 <th></th>
@@ -42,14 +42,15 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if(count($Subs) > 0)
-                            @foreach ($Subs as $Sub)
+                            @if(count($User_products) > 0)
+                            @foreach ($User_products as $subs)
                             <tr>
-                                <td>{{ $Sub->User->name }}</td>
-                                <td>{{ $Sub->plan->name }}</td>
-                                <td>{{ $Sub->plan_type }}</td>
-                                <td>{{ $Sub->current_period_start }}</td>
-                                <td>{{ $Sub->current_period_end }}</td>
+                                <td>{{ $subs->User->name }}</td>
+                                <td>{{ $subs->Product->name }}</td>
+                                <td>{{ $subs->purchase_type }}</td>
+
+                                <td>{{ $subs->subscription_start_date }}</td>
+                                <td>{{ $subs->subscription_end_date }}</td>
 
                                 {{--  <td><a href="" class="btn btn-danger">DELETE</a></td>  --}}
                             </tr>

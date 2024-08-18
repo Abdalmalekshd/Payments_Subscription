@@ -15,8 +15,10 @@
                     <h5 class="nav-header">NAVIGATION</h5>
                     <nav class="nav flex-column">
                         <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
-                        <a class="nav-link" href="{{ route('manage.subs') }}">Manage Subscriptions</a>
-                        <a class="nav-link" href="{{ route('manage.users') }}">Manage Users</a>
+                        <a class="nav-link" href="{{ route('manage.subs') }}">MANAGE SUBSCRIPTIONS</a>
+                        <a class="nav-link" href="{{ route('manage.products.subs') }}">MANAGE PRODUCTS SUBSCRIPTIONS</a>
+
+                        <a class="nav-link" href="{{ route('manage.users') }}">MANAGE USERS</a>
                         <a class="nav-link" href="{{ route('admin.settings') }}">Settings</a>
                     </nav>
                 </div>

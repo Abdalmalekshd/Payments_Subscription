@@ -19,12 +19,12 @@ $noNavbar = '';
                             <p class="card-text">Category: Tables</p>
                             <p class="card-text lead">${{ $product->price }}</p>
                             <a class="btn btn-primary btn-details"
-                               href="#" data-toggle="modal" data-target="#productDetailsModal"
-                               data-title="{{ $product->name }}" data-category="Tables" data-price="{{ $product->price }}"
+                               href="#" data-toggle="modal" data-target="#productDetailsModal" data-id="{{ $product->id }}"
+                               data-title="{{ $product->name }}"  data-category="Tables" data-price="{{ $product->price }}"
                                data-description="{{ $product->description }}"
                                data-image="{{ url('storage/products/'.$product->image) }}"
                             >Details</a>
-                            <a class="btn btn-success" href="#" data-toggle="modal" data-target="#cartModal">Add to Cart</a>
+                            <a class="btn btn-success" href="#" data-toggle="modal" data-target="#cartModal" data-product-id="{{ $product->id }}">Add to Cart</a>
                         </div>
                     </div>
                 </div>
@@ -89,9 +89,9 @@ $noNavbar = '';
             <div class="modal-body">
                 <ul class="list-group">
                     <li class="list-group-item">
-                        <form id="purchaseForm" method="POST" action="{{ route('Purchase', $product->id) }}">
+                        <form id="purchaseForm" method="POST" action="{{ route('Purchase') }}">
                             @csrf
-                            <input type="hidden" name="product_id" id="product_id" value="{{ $product->id }}">
+                            <input type="hidden" name="product_id" id="product_id">
                             <input type="hidden" name="purchase_type" id="purchase_type">
                             <div class="form-group">
                                 <label for="purchaseOption">Select Option:</label>
@@ -112,7 +112,6 @@ $noNavbar = '';
         </div>
     </div>
 </div>
-
 {{-- End Add to Cart Modal --}}
 
 <script>
@@ -127,7 +126,7 @@ $noNavbar = '';
     $('#cartModal').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget); // Button that triggered the modal
         var productId = button.data('product-id');
-        
+
         // Update hidden fields in the form
         $('#product_id').val(productId);
     });
@@ -139,6 +138,7 @@ $noNavbar = '';
 
     $('#productDetailsModal').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget); // Button that triggered the modal
+
         var title = button.data('title');
         var price = button.data('price');
         var description = button.data('description');
@@ -148,14 +148,6 @@ $noNavbar = '';
         modal.find('.modal-title').text(title);
         modal.find('#productTitle').text(title);
         modal.find('#productPrice').text('Product Price: $' + price);
-        modal.find('#productDescription').text('Product Description: ' + description);
-        modal.find('#productImage').attr('src', image);
-
-        var modal = $(this);
-        modal.find('.modal-title').text(title);
-        modal.find('#productTitle').text(title);
-        {{--  modal.find('#productCategory').text('Category: ' + category);  --}}
-        modal.find('#productPrice').text('Product Price:$ ' + price);
         modal.find('#productDescription').text('Product Description: ' + description);
         modal.find('#productImage').attr('src', image);
     });

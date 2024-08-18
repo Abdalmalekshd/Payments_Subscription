@@ -45,16 +45,17 @@ use App\Http\Controllers\PurchaseController;
         //Start Products And Purchases Routes
     Route::get('products',[ProductsController::class,'products'])->name('home');
 
+    Route::get('manage_proddutcs_subs',[ProductsController::class,'manageProductssubs'])->name('product.subscription');
 
-    
+
     //Start Subscribe Purchase  Routes
-    Route::post('/Subscribe_Purchase/{id}', [PurchaseController::class,'SubscribePurchaseProduct'])->name('Purchase');
+    Route::post('/Subscribe_Purchase', [PurchaseController::class,'SubscribePurchaseProduct'])->name('Purchase');
 
     Route::get('success_Subscribe_Purchase',  [PurchaseController::class,'PurchaseProductSuccess'])->name('Purchase.Success');
 
     Route::get('cancel_Subscribe_Purchase',[PurchaseController::class,'PurchaseProductCancel'])->name('Purchase.Cancel');
     //End Subscribe Purchase  Routes
-        
+
     //End Products And Purchases Routes
 
     //Start Account Routes

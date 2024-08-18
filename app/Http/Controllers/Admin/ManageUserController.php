@@ -14,7 +14,7 @@ class ManageUserController extends Controller
         $data=[];
         $data['Users']=User::get();
 
-        return view('admin.ManageUsers',$data);
+        return view('Admin.ManageUsers',$data);
      }
 
 

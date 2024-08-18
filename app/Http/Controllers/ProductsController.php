@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\User_Product;
 use Illuminate\Http\Request;
 
 class ProductsController extends Controller
@@ -13,4 +14,15 @@ class ProductsController extends Controller
 
         return view('Products',['products' => $product]);
     }
+
+
+
+    public function manageProductssubs(){
+
+        $data=[];
+        $data['User_products']=User_Product::get();
+
+
+        return view('ManageSubs',$data);
+     }
 }

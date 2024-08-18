@@ -16,6 +16,11 @@
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('update_payments') }}">UPDATE PAYMENT</a>
             </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('manage.products.subs') }}">MANAGE PRODUCTS SUBSCRIPTIONS</a>
+            </li>
+
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('receipts') }}">RECEIPTS</a>
             </li>
