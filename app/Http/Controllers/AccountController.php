@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UserRequest;
 use App\Models\Plan;
+use App\Models\Subscription;
 use App\Models\User;
 use Hash;
 use Illuminate\Http\Request;
@@ -11,9 +12,9 @@ use Stripe\Stripe;
 use Stripe\PaymentIntent;
 use Illuminate\Support\Facades\Auth;
 use Log;
-use Session;
-use Stripe\StripeClient;
-
+use Stripe\PaymentMethod;
+use Stripe\Customer;
+use Stripe\Subscription as StripeSubscription;
 class AccountController extends Controller
 {
 
@@ -54,85 +55,96 @@ class AccountController extends Controller
         return view('subscriptions',compact('plans'));
     }
 
+
     public function update_payments(){
-        $stripe = new StripeClient(config('services.stripe.sk'));
-
-        try {
-            // Retrieve customer details
-            if(Auth::user()->subscriptionplan){
-
-             $customerId=User::find(Auth::user()->id)->stripe_id;
-
-            $customer = $stripe->customers->retrieve($customerId);
-
-            // Retrieve payment methods associated with the customer
-            $paymentMethods = $stripe->paymentMethods->all([
-                'customer' => $customerId,
-                'type' => 'card',
-            ]);
-
-            // Check if there are any payment methods available
-            if (count($paymentMethods->data) > 0) {
-                // Get the first payment method (assuming there is at least one)
-                     $paymentMethod = $paymentMethods->data[0];
-                $card =$paymentMethod->card;
+        
+    
 
 
-                // Prepare the response data
-                $data ['response'] = [
-                    'email' => $customer->email,
-                    'payment_method' => $paymentMethod->type,
-                    'card_brand' => $card->brand,
-                    'card_last4' => $card->last4,
-                    'card_expiration' =>  $card->exp_year,
-                ];
-            } else {
-                $data ['response'] = [
-                    'email' => $customer->email,
-                    'payment_method' => 'No payment method found',
-                    'card_brand' => '',
-                    'card_last4' => '',
-                    'card_expiration' => '',
-                ];
-            }
+            return view('Update_Payments');
 
-            return view('Update_Payments',$data);
-        }
-
-        return view('Update_Payments');
-
-        } catch (\Stripe\Exception\ApiErrorException $e) {
-
-
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-
+   
+        
 
     }
+
+    public function updateCard(Request $request)
+    {
+        Stripe::setApiKey(env('STRIPE_SECRET'));
+
+        $user = Auth::user();
+
+        try {
+            // Create a PaymentMethod using the token
+            $paymentMethod = PaymentMethod::create([
+                'type' => 'card',
+                'card' => [
+                    'token' => $request->token,
+                ],
+            ]);
+
+            // Retrieve the customer from Stripe
+            $customer = Customer::retrieve($user->stripe_id);
+
+            // Attach the PaymentMethod to the customer
+            $paymentMethod->attach(['customer' => $user->stripe_id]);
+
+            // Set the new PaymentMethod as the default payment method for the customer
+            $customer->invoice_settings->default_payment_method = $paymentMethod->id;
+            $customer->save();
+
+            // Update user model with card details
+            $user->pm_type = $paymentMethod->card->brand;
+            $user->pm_last_four = $paymentMethod->card->last4;
+            $user->trial_ends_at = now()->addDays(30); // Assuming a 30-day trial period
+            $user->save();
+
+            Log::info('Card updated successfully for customer: ' . $customer->id);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            Log::error('Error updating card: ' . $e->getMessage());
+            return response()->json(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+    
+    
+    
 
 
 
     public function receipts(){
-        Stripe::setApiKey(config('services.stripe.sk'));
 
+        // Set Stripe secret key
+    Stripe::setApiKey(config('services.stripe.sk'));
 
-        $customerStripeId=Auth::user()->stripe_id;
+    // Retrieve Stripe customer ID from authenticated user
+    $customerStripeId = Auth::user()->stripe_id;
 
-        $payments = PaymentIntent::all(['customer' => $customerStripeId]);
+    // Fetch all subscriptions for the customer
+    $stripeSubscriptions = \Stripe\Subscription::all(['customer' => $customerStripeId]);
 
-        $paymentData = [];
-        foreach ($payments->data as $payment) {
+    $paymentData = [];
+    foreach ($stripeSubscriptions->data as $subscription) {
+        foreach ($subscription->items->data as $item) {
+            // Retrieve the price details
+            $price = \Stripe\Price::retrieve($item->price->id);
+            $product = \Stripe\Product::retrieve($price->product);
+
             $paymentData[] = [
-                'amount' => number_format($payment->amount / 100, 2),
-                'currency' => strtoupper($payment->currency),
-                'status' => $payment->status,
+                'amount' => number_format($price->unit_amount / 100, 2),
+                'currency' => strtoupper($price->currency),
+                'status' => $subscription->status,
+                'plan_name' => $product->name,
+                 // Use metadata from the price
+                'start_date' => $subscription->current_period_start ? date('Y-m-d', $subscription->current_period_start) : 'N/A',
+                'end_date' => $subscription->current_period_end ? date('Y-m-d', $subscription->current_period_end) : 'N/A',
             ];
         }
-
-        return view('receipts', ['payments' => $paymentData]);
-
     }
 
+    return view('receipts', ['payments' => $paymentData]);
+
+    }
 
     public function cancel_sub(){
         return view('Cancel_Sub');

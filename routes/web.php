@@ -83,6 +83,10 @@ use App\Http\Controllers\PurchaseController;
 
     Route::get('update_payments',[AccountController::class,'update_payments'])->name('update_payments');
 
+    
+    
+    Route::post('/update-card', [AccountController::class, 'updateCard'])->name('update.card');
+
     //End update payments Routes
 
 

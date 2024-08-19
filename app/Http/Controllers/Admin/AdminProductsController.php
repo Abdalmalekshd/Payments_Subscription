@@ -18,8 +18,9 @@ class AdminProductsController extends Controller
     public function ShowProducts(){
         $product=Product::paginate(20);
 
-        return view('Admin.products',['products' => $product]);
+        return view('Admin.Products',['products' => $product]);
     }
+
     public function AddProductsForm(){
         return view('Admin.add_products');
     }

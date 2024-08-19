@@ -1,5 +1,5 @@
 @extends('Layout.UserMaster')
-@section('Title','Subscription Page')
+@section('Title','Products Page')
 
 @section('content')
 
@@ -99,6 +99,8 @@ $noNavbar = '';
                                     <option value="one_time">Buy Now</option>
                                     <option value="weekly">Subscribe Weekly</option>
                                     <option value="monthly">Subscribe Monthly</option>
+                                    <option value="yearly">Subscribe Yearly</option>
+
                                 </select>
                             </div>
                             <input type="submit" class="btn btn-primary btn-block" value="Proceed">

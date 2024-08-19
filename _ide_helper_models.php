@@ -44,7 +44,7 @@ namespace App\Models{
  * @property string|null $yearly_price_id
  * @property int|null $monthly_price
  * @property int|null $yearly_price
- * @property array|null $features
+ * @property array $features
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Subscription> $subscriptionplan
@@ -76,6 +76,7 @@ namespace App\Models{
  * @property string $image
  * @property string $stripe_one_time_price_id
  * @property string $stripe_weekly_price_id
+ * @property string $stripe_yearly_price_id
  * @property string $stripe_monthly_price_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -93,6 +94,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Product whereStripeMonthlyPriceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Product whereStripeOneTimePriceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Product whereStripeWeeklyPriceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Product whereStripeYearlyPriceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Product whereUpdatedAt($value)
  */
 	class Product extends \Eloquent {}
@@ -192,6 +194,7 @@ namespace App\Models{
  * @property string|null $subscription_end_date
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $subscription_id
  * @property-read \App\Models\Product $Product
  * @property-read \App\Models\User $User
  * @method static \Illuminate\Database\Eloquent\Builder|User_Product newModelQuery()
@@ -203,6 +206,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|User_Product wherePurchaseType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User_Product whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User_Product whereSubscriptionEndDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User_Product whereSubscriptionId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User_Product whereSubscriptionStartDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User_Product whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User_Product whereUserId($value)

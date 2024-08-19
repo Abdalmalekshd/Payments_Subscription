@@ -20,7 +20,7 @@ class ProcessProductPurchase implements ShouldQueue
 
 
     public $userProduct;
-    
+
     /**
      * Create a new job instance.
      *
@@ -57,10 +57,9 @@ class ProcessProductPurchase implements ShouldQueue
             // Retrieve the customer's default payment method from Stripe
             $customerId = $this->userProduct->user->stripe_id;
             $customer = $stripeClient->customers->retrieve($customerId);
-            $paymentMethod = $customer->invoice_settings->default_payment_method;
 
-            // If no default payment method, check available payment methods
-            if (!$paymentMethod) {
+            // Ensure that the customer has a default payment method
+            if (!$customer->invoice_settings->default_payment_method) {
                 $paymentMethods = $stripeClient->paymentMethods->all([
                     'customer' => $customerId,
                     'type' => 'card',
@@ -80,6 +79,9 @@ class ProcessProductPurchase implements ShouldQueue
                 }
             }
 
+            // Use the default payment method for payment
+            $paymentMethod = $customer->invoice_settings->default_payment_method;
+
             // Amount in cents
             $amountInCents = max($price->unit_amount, 50); // Minimum amount in cents
 
@@ -93,33 +95,34 @@ class ProcessProductPurchase implements ShouldQueue
                 'confirm' => true,
             ]);
 
-            // If the PaymentIntent succeeds, update the user's default payment method if not set
+            // If the PaymentIntent succeeds, update the user's subscription details
             if ($paymentIntent->status === 'succeeded') {
                 $newEndDate = Carbon::now();
                 if ($this->userProduct->purchase_type === 'weekly') {
                     $newEndDate = $newEndDate->addWeek();
                 } elseif ($this->userProduct->purchase_type === 'monthly') {
                     $newEndDate = $newEndDate->addMonth();
+                } elseif ($this->userProduct->purchase_type === 'yearly') {
+                    $newEndDate = $newEndDate->addYear();
                 }
 
+                // Update the current subscription status to expired
                 $this->userProduct->update([
-                    'status' => 'subscribe',
+                    'status' => 'expired',
+                ]);
+
+                // Create a new subscription record
+                User_Product::create([
+                    'user_id' => $this->userProduct->user->id,
+                    'product_id' => $this->userProduct->product_id,
+                    'status' => 'Subscribe',
+                    'purchase_type' => $this->userProduct->purchase_type,
                     'subscription_start_date' => Carbon::now(),
                     'subscription_end_date' => $newEndDate,
                 ]);
 
-                // Update default payment method if it was not set
-                if (!$customer->invoice_settings->default_payment_method) {
-                    $stripeClient->customers->update($customerId, [
-                        'invoice_settings' => [
-                            'default_payment_method' => $paymentIntent->payment_method,
-                        ],
-                    ]);
-                }
-
                 Log::info('Product purchase charged successfully: ' . $this->userProduct->id);
             } else {
-
                 Log::error('Payment failed for product purchase: ' . $this->userProduct->id);
             }
         } catch (ApiErrorException $e) {
@@ -127,6 +130,5 @@ class ProcessProductPurchase implements ShouldQueue
         } catch (\Exception $e) {
             Log::error('General Error: ' . $e->getMessage());
         }
-    
     }
 }

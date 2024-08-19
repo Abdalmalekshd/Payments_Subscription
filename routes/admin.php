@@ -42,7 +42,12 @@ Route::group(['middleware'=>['auth:admin'],'prefix'=>'admin'],function(){
 
     Route::get('manage_subscription',[ManageSubsController::class,'managesubs'])->name('manage.subs');
 
+    Route::get('Cancel_User_sub/{id}',[ManageSubsController::class,'cancel_user_subscription'])->name('cancel.user.sub');
+
+
     Route::get('manage_products_subscription',[ManageSubsController::class,'manageProductssubs'])->name('manage.products.subs');
+
+    Route::get('Cancel_User_product_sub/{id}',[ManageSubsController::class,'cancel_user_product_subscription'])->name('cancel.user.product.sub');
 
     //End Manage Subscription Routes
 

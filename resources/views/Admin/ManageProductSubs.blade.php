@@ -15,7 +15,6 @@
                         <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
                         <a class="nav-link" href="{{ route('manage.subs') }}">MANAGE SUBSCRIPTIONS</a>
                         <a class="nav-link" href="{{ route('manage.products.subs') }}">MANAGE PRODUCTS SUBSCRIPTIONS</a>
-
                         <a class="nav-link" href="{{ route('manage.users') }}">MANAGE USERS</a>
                         <a class="nav-link" href="{{ route('admin.settings') }}">Settings</a>
 
@@ -35,6 +34,7 @@
                                 <th>user_name</th>
                                 <th>Product_name</th>
                                 <th>Subscription_type</th>
+                                <th>Status</th>
                                 <th>Subscription_start_date</th>
                                 <th>Subscription_end_date</th>
                                 <th></th>
@@ -48,11 +48,11 @@
                                 <td>{{ $subs->User->name }}</td>
                                 <td>{{ $subs->Product->name }}</td>
                                 <td>{{ $subs->purchase_type }}</td>
-
+                                <td>{{ $subs->status }}</td>
                                 <td>{{ $subs->subscription_start_date }}</td>
                                 <td>{{ $subs->subscription_end_date }}</td>
 
-                                {{--  <td><a href="" class="btn btn-danger">DELETE</a></td>  --}}
+                                <td><a href="{{ route('cancel.user.product.sub',$subs->User->id) }}" class="btn btn-danger">Cancel Subscription</a></td>
                             </tr>
                         @endforeach
                         @else

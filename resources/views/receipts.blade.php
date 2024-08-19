@@ -20,13 +20,11 @@
                         <a class="nav-link" href="{{ route('subscriptions') }}">SUBSCRIPTIONS</a>
                         <a class="nav-link" href="{{ route('update_payments') }}">UPDATE PAYMENT</a>
                         <a class="nav-link" href="{{ route('product.subscription') }}">Products Subscriptions</a>
-
-
                         <a class="nav-link" href="{{ route('receipts') }}">RECEIPTS</a>
                         <a class="nav-link" href="{{ route('cancel_sub') }}">CANCEL SUBSCRIPTION</a>
                     </nav>
                 </div>
-                <div class="col-12 col-md-9">
+                <div class="col-12 col-md-9"  style="overflow: scroll">
 
                     <table class="table">
                         <thead>
@@ -34,6 +32,11 @@
                                 <th>Amount</th>
                                 <th>Currency</th>
                                 <th>Status</th>
+                                <th>Plan_Name OR Product</th>
+
+                                <th>Current_period_start</th>
+                                <th>Current_period_end</th>
+
                             </tr>
                         </thead>
                         <tbody>
@@ -42,6 +45,10 @@
                                     <td>${{ $payment['amount'] }}</td>
                                     <td>{{ $payment['currency'] }}</td>
                                     <td>{{ ucfirst($payment['status']) }}</td>
+                                    <td>{{ $payment['plan_name'] }}</td>
+
+                                    <td>{{ $payment['start_date'] }}</td>
+                                    <td>{{ $payment['end_date'] }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

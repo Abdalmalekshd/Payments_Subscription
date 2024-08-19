@@ -36,6 +36,7 @@
 
                                 <th>Product_name</th>
                                 <th>Subscription_type</th>
+                                <th>Status</th>
                                 <th>Subscription_start_date</th>
                                 <th>Subscription_end_date</th>
                                 <th></th>
@@ -49,6 +50,8 @@
 
                                 <td>{{ $subs->Product->name }}</td>
                                 <td>{{ $subs->purchase_type }}</td>
+                                <td>{{ $subs->status }}</td>
+
 
                                 <td>{{ $subs->subscription_start_date }}</td>
                                 <td>{{ $subs->subscription_end_date }}</td>
@@ -57,7 +60,7 @@
                             </tr>
                         @endforeach
                         @else
-                        <h3>There is no users in here right now.</h3>
+                        <h3>There is no products subscriptions in here right now.</h3>
                         @endif
 
                         </tbody>

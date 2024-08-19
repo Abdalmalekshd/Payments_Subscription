@@ -11,7 +11,7 @@ class User_Product extends Model
 
     public $table='user_products';
 
-    public $fillable=['product_id','user_id','status','purchase_type','subscription_start_date','subscription_end_date'];
+    public $fillable=['product_id','user_id','status','purchase_type','subscription_start_date','subscription_end_date','subscription_id'];
 
 
 

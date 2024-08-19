@@ -15,7 +15,7 @@ class ChargeProductPurchases extends Command
      * @var string
      */
     protected $signature = 'products:charge';
-    
+
 
     /**
      * The console command description.

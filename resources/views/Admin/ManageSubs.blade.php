@@ -35,6 +35,7 @@
                                 <th>user_name</th>
                                 <th>Subscription_plan</th>
                                 <th>Subscription_plan_type</th>
+                                <th>Status</th>
                                 <th>Subscription_start_date</th>
                                 <th>Subscription_end_date</th>
                                 <th></th>
@@ -48,10 +49,13 @@
                                 <td>{{ $Sub->User->name }}</td>
                                 <td>{{ $Sub->plan->name }}</td>
                                 <td>{{ $Sub->plan_type }}</td>
+                                <td>{{ $Sub->status }}</td>
+
                                 <td>{{ $Sub->current_period_start }}</td>
                                 <td>{{ $Sub->current_period_end }}</td>
 
-                                {{--  <td><a href="" class="btn btn-danger">DELETE</a></td>  --}}
+                                <td><a href="{{ route('cancel.user.sub',$Sub->User->id) }}" class="btn btn-danger">Cancel Subscription</a></td>
+
                             </tr>
                         @endforeach
                         @else

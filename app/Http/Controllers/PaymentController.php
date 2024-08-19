@@ -25,50 +25,50 @@ class PaymentController extends Controller
                 try {
                     // Retrieve plan from database
                     $plan = Plan::findOrFail($plan_id);
-                    if($plan){
-                    // Set Stripe secret key
-                    Stripe::setApiKey(env('STRIPE_SECRET'));
+                    if ($plan) {
+                        // Set Stripe secret key
+                        Stripe::setApiKey(env('STRIPE_SECRET'));
 
-                    // Create or retrieve Stripe customer
-                    if (!$user->stripe_id) {
-                        $stripeCustomer = \Stripe\Customer::create([
-                            'email' => $user->email,
+                        // Create or retrieve Stripe customer
+                        if (!$user->stripe_id) {
+                            $stripeCustomer = \Stripe\Customer::create([
+                                'email' => $user->email,
+                            ]);
+                            $user->stripe_id = $stripeCustomer->id;
+                            $user->save();
+                        }
+
+                        // Determine the price ID based on plan type
+                        $price_id = $plan_type == 'year' ? $plan->yearly_price_id : $plan->monthly_price_id;
+
+                        // Check if price_id is valid and active
+                        if (!$price_id) {
+                            return redirect()->route('subscriptions')->withErrors('Invalid price ID.');
+                        }
+
+                        // Create a checkout session
+                        $session = \Stripe\Checkout\Session::create([
+                            'payment_method_types' => ['card'],
+                            'line_items' => [[
+                                'price' => $price_id,
+                                'quantity' => 1,
+                            ]],
+                            'mode' => 'subscription',
+                            'customer' => $user->stripe_id,
+                            'metadata' => [
+                                'user_id' => $user->id,
+                                'plan_id' => $plan_id,
+                                'plan_name' => $plan->name,
+                                'plan_type' => $plan_type,
+                            ],
+                            'success_url' => route('success') . '?session_id={CHECKOUT_SESSION_ID}&id=' . $user->id . '&email=' . urlencode($user->email) . '&plan_id=' . $plan_id . '&plan_name=' . urlencode($plan->name) . '&plan_type=' . $plan_type . '&price_id=' . $price_id,
+                            'cancel_url' => route('cancel'),
                         ]);
-                        $user->stripe_id = $stripeCustomer->id;
-                        $user->save();
+
+                        return redirect()->away($session->url);
+                    } else {
+                        return redirect()->back();
                     }
-
-                    // Determine the price ID based on plan type
-                    $price_id = $plan_type == 'year' ? $plan->yearly_price_id : $plan->monthly_price_id;
-
-                    // Check if price_id is valid and active
-                    if (!$price_id) {
-                        return redirect()->route('subscriptions')->withErrors('Invalid price ID.');
-                    }
-
-                    // Create a checkout session
-                    $session = StripeSession::create([
-                        'payment_method_types' => ['card'],
-                        'line_items' => [[
-                            'price' => $price_id,
-                            'quantity' => 1,
-                        ]],
-                        'mode' => 'subscription',
-                        'customer' => $user->stripe_id,
-                        'metadata' => [
-                            'user_id' => $user->id,
-                            'plan_id' => $plan_id,
-                            'plan_name' => $plan->name,
-                            'plan_type' => $plan_type,
-                        ],
-                        'success_url' => route('success') . '?session_id={CHECKOUT_SESSION_ID}&id=' . $user->id . '&email=' . urlencode($user->email) . '&plan_id=' . $plan_id . '&plan_name=' . urlencode($plan->name) . '&plan_type=' . $plan_type .'&price_id='.$price_id,
-                        'cancel_url' => route('cancel'),
-                    ]);
-
-                    return redirect()->away($session->url);
-                }else{
-                    return redirect()->back();
-                }
 
                 } catch (\Stripe\Exception\InvalidRequestException $e) {
                     return redirect()->route('home')->withErrors('Invalid request to Stripe: ' . $e->getMessage());
@@ -80,20 +80,17 @@ class PaymentController extends Controller
 
         public function success(Request $request)
         {
+            Stripe::setApiKey(env('STRIPE_SECRET'));
+
             $userId = $request->get('id');
             $planId = $request->get('plan_id');
             $sessionId = $request->query('session_id');
             $price_id = $request->get('price_id');
-
             $plan_type = $request->get('plan_type');
-
-
-            // Set Stripe secret key
-            Stripe::setApiKey(env('STRIPE_SECRET'));
 
             try {
                 // Retrieve the session from Stripe
-                $session = StripeSession::retrieve($sessionId);
+                $session = \Stripe\Checkout\Session::retrieve($sessionId);
 
                 // Check if session contains subscription ID
                 $subscriptionId = $session->subscription ?? null;
@@ -103,7 +100,7 @@ class PaymentController extends Controller
                 }
 
                 // Get subscription details from Stripe
-                $stripeSubscription = StripeSubscription::retrieve($subscriptionId);
+                $stripeSubscription = \Stripe\Subscription::retrieve($subscriptionId);
 
                 // Check if subscription object was successfully retrieved
                 if (!$stripeSubscription) {
@@ -111,7 +108,6 @@ class PaymentController extends Controller
                 }
 
                 // Get subscription details
-
                 $currentPeriodStart = Carbon::createFromTimestamp($stripeSubscription->current_period_start);
                 $currentPeriodEnd = Carbon::createFromTimestamp($stripeSubscription->current_period_end);
 
@@ -126,7 +122,7 @@ class PaymentController extends Controller
                         'stripe_price_id' => $price_id,
                         'status' => $stripeSubscription->status,
                         'plan_id' => $planId,
-                        'plan_type'=>$plan_type,
+                        'plan_type' => $plan_type,
                         'current_period_start' => $currentPeriodStart,
                         'current_period_end' => $currentPeriodEnd,
                     ]);
@@ -137,77 +133,22 @@ class PaymentController extends Controller
                         'stripe_price_id' => $price_id,
                         'status' => $stripeSubscription->status,
                         'plan_id' => $planId,
-                        'plan_type'=>$plan_type,
-
+                        'plan_type' => $plan_type,
                         'current_period_start' => $currentPeriodStart,
                         'current_period_end' => $currentPeriodEnd,
                     ]);
                 }
 
-
-
-                return redirect()->route('subscriptions')->with(['success'=> 'Subscription successfully updated!']);
+                return redirect()->route('subscriptions')->with(['success' => 'Subscription successfully updated!']);
             } catch (\Exception $e) {
-                return redirect()->back()->with(['error'=> 'Something went wrong please try agian later']);
-
-               return redirect()->route('subscriptions')->withErrors('An error occurred: ' . $e->getMessage());
+                return redirect()->back()->with(['error' => 'Something went wrong. Please try again later.']);
             }
-
     }
 
     public function  cancel(){
         return Redirect()->route('subscriptions');
     }
 
-    public function cancel_subscription()
-    {
-
-            $user = Auth::user();
-            $subscription = Subscription::where('user_id', $user->id)->first();
-
-            if (!$subscription || $subscription->status === 'canceled') {
-                return redirect()->back()->withErrors('No subscription found.');
-            }
-
-            // Set Stripe secret key
-            Stripe::setApiKey(env('STRIPE_SECRET'));
-
-            // Retrieve the subscription from Stripe
-            $stripeSubscription = StripeSubscription::retrieve($subscription->subscription_id);
-
-            // Cancel the subscription immediately
-            $stripeSubscription->cancel();
-
-            // Retrieve the latest invoice to process a refund
-            $invoice = Invoice::all([
-                'subscription' => $subscription->subscription_id,
-                'limit' => 1
-            ])->data[0];
-
-            if ($invoice) {
-                try {
-                    // Create a refund
-                    Refund::create([
-                        'charge' => $invoice->charge,
-                        'amount' => $invoice->amount_due // Amount to refund in cents
-                    ]);
-
-                    // Update the subscription status in your database
-                    $subscription->status = 'canceled';
-                    $subscription->save();
-                    return redirect()->back()->with(['success'=> 'Your subscription has been canceled and a refund has been processed.']);
-
-                } catch (\Exception $e) {
-                    return redirect()->back()->with(['error'=> 'Something went wrong please try agian later']);
-
-                    return redirect()->back()->withErrors('Failed to process refund: ' . $e->getMessage());
-                }
-            } else {
-                return redirect()->back()->withErrors('No invoice found to process refund.');
-            }
-
-
-    }
 
 
 
@@ -265,6 +206,53 @@ class PaymentController extends Controller
     }
 
 
+    public function cancel_subscription()
+    {
 
+            $user = Auth::user();
+            $subscription = Subscription::where('user_id', $user->id)->first();
+
+            if (!$subscription || $subscription->status === 'canceled') {
+                return redirect()->back()->withErrors('No subscription found.');
+            }
+
+            // Set Stripe secret key
+            Stripe::setApiKey(env('STRIPE_SECRET'));
+
+            // Retrieve the subscription from Stripe
+            $stripeSubscription = StripeSubscription::retrieve($subscription->subscription_id);
+
+            // Cancel the subscription immediately
+            $stripeSubscription->cancel();
+
+            // Retrieve the latest invoice to process a refund
+            $invoice = Invoice::all([
+                'subscription' => $subscription->subscription_id,
+                'limit' => 1
+            ])->data[0];
+
+            if ($invoice) {
+                try {
+                    // Create a refund
+                    Refund::create([
+                        'charge' => $invoice->charge,
+                        'amount' => $invoice->amount_due // Amount to refund in cents
+                    ]);
+
+                    // Update the subscription status in your database
+                    $subscription->status = 'canceled';
+                    $subscription->save();
+                    return redirect()->back()->with(['success'=> 'Your subscription has been canceled and a refund has been processed.']);
+
+                } catch (\Exception $e) {
+                    return redirect()->back()->with(['error'=> 'Something went wrong please try agian later']);
+
+                }
+            } else {
+                return redirect()->back()->withErrors('No invoice found to process refund.');
+            }
+
+
+    }
 
 }
