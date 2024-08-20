@@ -97,7 +97,8 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="payment-form">
+                <form action="{{ route('update.card') }}" method="POST" id="payment-form">
+                    @csrf
                     <div class="form-group">
                         <label for="card-element">Credit or debit card</label>
                         <div id="card-element" class="form-control">
@@ -105,6 +106,13 @@
                         </div>
                     </div>
                     <div id="card-errors" role="alert" class="text-danger mt-2"></div>
+
+                    <!-- New input for card expiration date -->
+                    <div class="form-group mt-3">
+                        <label for="card-expiration">Expiration Date</label>
+                        <input type="text" id="card-expiration" name="expiration_date" class="form-control" placeholder="MM/YY" required>
+                    </div>
+
                     <button id="submit" class="btn btn-primary mt-3 btn-block">Update Card</button>
                 </form>
             </div>
@@ -112,57 +120,66 @@
     </div>
 </div>
 
+
 <script src="https://js.stripe.com/v3/"></script>
 <script>
-    var stripe = Stripe('{{ env('STRIPE_KEY') }}');
-    var elements = stripe.elements();
-    var card = elements.create('card', {
-        style: {
-            base: {
-                fontSize: '16px',
-                color: '#32325d',
-                '::placeholder': {
-                    color: '#aab7c4'
-                }
-            },
-            invalid: {
-                color: '#fa755a',
-                iconColor: '#fa755a'
+  // Stripe Elements setup
+var stripe = Stripe('{{ env('STRIPE_KEY') }}');
+var elements = stripe.elements();
+var card = elements.create('card', {
+    style: {
+        base: {
+            fontSize: '16px',
+            color: '#32325d',
+            '::placeholder': {
+                color: '#aab7c4'
             }
+        },
+        invalid: {
+            color: '#fa755a',
+            iconColor: '#fa755a'
+        }
+    }
+});
+card.mount('#card-element');
+
+var form = document.getElementById('payment-form');
+form.addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    stripe.createToken(card).then(function(result) {
+        if (result.error) {
+            var errorElement = document.getElementById('card-errors');
+            errorElement.textContent = result.error.message;
+        } else {
+            // Get expiration date input value
+            var expirationDate = document.getElementById('card-expiration').value;
+
+            fetch('/update-card', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    token: result.token.id,
+                    expiration_date: expirationDate
+                })
+            }).then(response => {
+                return response.json();
+            }).then(data => {
+                if (data.success) {
+                    alert('Card updated successfully!');
+                    window.location.href = "{{ url()->previous() }}"; // Redirect to the previous page
+                } else {
+                    alert('Failed to update card: ' + data.error);
+                    window.location.href = "{{ url()->previous() }}"; // Redirect to the previous page
+                }
+            });
         }
     });
-    card.mount('#card-element');
+});
 
-    var form = document.getElementById('payment-form');
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();
-
-        stripe.createToken(card).then(function(result) {
-            if (result.error) {
-                var errorElement = document.getElementById('card-errors');
-                errorElement.textContent = result.error.message;
-            } else {
-                fetch('/update-card', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({token: result.token.id})
-                }).then(response => {
-                    return response.json();
-                }).then(data => {
-                    if (data.success) {
-                        alert('Card updated successfully!');
-                        $('#updateCardModal').modal('hide'); // Hide modal on success
-                        location.reload(); // Reload page to reflect changes
-                    } else {
-                        alert('Failed to update card.');
-                    }
-                });
-            }
-        });
-    });
 </script>
 
 @endsection

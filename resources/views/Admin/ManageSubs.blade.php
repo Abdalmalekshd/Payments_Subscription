@@ -53,13 +53,13 @@
 
                                 <td>{{ $Sub->current_period_start }}</td>
                                 <td>{{ $Sub->current_period_end }}</td>
-
+                                @if ($Sub->status == 'active')
                                 <td><a href="{{ route('cancel.user.sub',$Sub->User->id) }}" class="btn btn-danger">Cancel Subscription</a></td>
-
+                                @endif
                             </tr>
                         @endforeach
                         @else
-                        <h3>There is no users in here right now.</h3>
+                        <h3>There is no subscriptions in here right now.</h3>
                         @endif
 
                         </tbody>

@@ -4,7 +4,7 @@ namespace App\Jobs;
 
 use App\Models\User_Product;
 use Carbon\Carbon;
-
+use DB;
 use Stripe\StripeClient;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -47,14 +47,9 @@ class ProcessProductPurchase implements ShouldQueue
         $stripeClient = new StripeClient($stripeSecretKey);
 
         try {
-            // Retrieve the price details
-            $priceId = $this->userProduct->product->stripe_one_time_price_id;
-            if (!$priceId) {
-                throw new \Stripe\Exception\InvalidArgumentException('Invalid price ID');
-            }
-            $price = $stripeClient->prices->retrieve($priceId);
 
-            // Retrieve the customer's default payment method from Stripe
+            DB::beginTransaction();
+
             $customerId = $this->userProduct->user->stripe_id;
             $customer = $stripeClient->customers->retrieve($customerId);
 
@@ -79,24 +74,40 @@ class ProcessProductPurchase implements ShouldQueue
                 }
             }
 
-            // Use the default payment method for payment
             $paymentMethod = $customer->invoice_settings->default_payment_method;
 
-            // Amount in cents
-            $amountInCents = max($price->unit_amount, 50); // Minimum amount in cents
+            // Select the appropriate price ID based on the purchase type
+            $priceId = null;
+            if ($this->userProduct->purchase_type === 'weekly') {
+                $priceId = $this->userProduct->product->stripe_weekly_price_id;
+            } elseif ($this->userProduct->purchase_type === 'monthly') {
+                $priceId = $this->userProduct->product->stripe_monthly_price_id;
+            } elseif ($this->userProduct->purchase_type === 'yearly') {
+                $priceId = $this->userProduct->product->stripe_yearly_price_id;
+            } else {
+                $priceId = $this->userProduct->product->stripe_one_time_price_id;
+            }
 
-            // Create a PaymentIntent
-            $paymentIntent = $stripeClient->paymentIntents->create([
-                'amount' => $amountInCents,
-                'currency' => $price->currency,
-                'customer' => $customerId,
-                'payment_method' => $paymentMethod,
-                'off_session' => true,
-                'confirm' => true,
-            ]);
+            if (!$priceId) {
+                throw new \Stripe\Exception\InvalidArgumentException('Invalid price ID for the selected purchase type');
+            }
 
-            // If the PaymentIntent succeeds, update the user's subscription details
-            if ($paymentIntent->status === 'succeeded') {
+            $price = $stripeClient->prices->retrieve($priceId);
+
+            if ($this->userProduct->purchase_type === 'weekly' ||
+                $this->userProduct->purchase_type === 'monthly' ||
+                $this->userProduct->purchase_type === 'yearly') {
+                // Handle recurring payment (Subscription)
+                if ($price->type !== 'recurring') {
+                    throw new \Stripe\Exception\InvalidArgumentException('The specified price is not recurring');
+                }
+
+                $subscription = $stripeClient->subscriptions->create([
+                    'customer' => $customerId,
+                    'items' => [['price' => $priceId]],
+                    'default_payment_method' => $paymentMethod,
+                ]);
+
                 $newEndDate = Carbon::now();
                 if ($this->userProduct->purchase_type === 'weekly') {
                     $newEndDate = $newEndDate->addWeek();
@@ -106,12 +117,11 @@ class ProcessProductPurchase implements ShouldQueue
                     $newEndDate = $newEndDate->addYear();
                 }
 
-                // Update the current subscription status to expired
+                // Update and create subscription record
                 $this->userProduct->update([
                     'status' => 'expired',
                 ]);
 
-                // Create a new subscription record
                 User_Product::create([
                     'user_id' => $this->userProduct->user->id,
                     'product_id' => $this->userProduct->product_id,
@@ -119,16 +129,68 @@ class ProcessProductPurchase implements ShouldQueue
                     'purchase_type' => $this->userProduct->purchase_type,
                     'subscription_start_date' => Carbon::now(),
                     'subscription_end_date' => $newEndDate,
+                    'subscription_id' => $subscription->id,
                 ]);
 
-                Log::info('Product purchase charged successfully: ' . $this->userProduct->id);
+                Log::info('Product subscription created successfully: ' . $this->userProduct->id);
+
             } else {
-                Log::error('Payment failed for product purchase: ' . $this->userProduct->id);
+                // Handle one-time payment (PaymentIntent)
+                if ($price->type !== 'one_time') {
+                    throw new \Stripe\Exception\InvalidArgumentException('The specified price is not one-time');
+                }
+
+                $amountInCents = max($price->unit_amount, 50); // Minimum amount in cents
+
+                $paymentIntent = $stripeClient->paymentIntents->create([
+                    'amount' => $amountInCents,
+                    'currency' => $price->currency,
+                    'customer' => $customerId,
+                    'payment_method' => $paymentMethod,
+                    'off_session' => true,
+                    'confirm' => true,
+                ]);
+
+                if ($paymentIntent->status === 'succeeded') {
+                    // Process one-time purchase completion
+                    $newEndDate = Carbon::now();
+                    if ($this->userProduct->purchase_type === 'weekly') {
+                        $newEndDate = $newEndDate->addWeek();
+                    } elseif ($this->userProduct->purchase_type === 'monthly') {
+                        $newEndDate = $newEndDate->addMonth();
+                    } elseif ($this->userProduct->purchase_type === 'yearly') {
+                        $newEndDate = $newEndDate->addYear();
+                    }
+
+                    $this->userProduct->update([
+                        'status' => 'expired',
+                    ]);
+
+                    User_Product::create([
+                        'user_id' => $this->userProduct->user->id,
+                        'product_id' => $this->userProduct->product_id,
+                        'status' => 'Subscribe',
+                        'purchase_type' => $this->userProduct->purchase_type,
+                        'subscription_start_date' => Carbon::now(),
+                        'subscription_end_date' => $newEndDate,
+                    ]);
+
+                    DB::commit();
+
+                    Log::info('Product purchase charged successfully: ' . $this->userProduct->id);
+                } else {
+                    Log::error('Payment failed for product purchase: ' . $this->userProduct->id);
+                }
             }
         } catch (ApiErrorException $e) {
+            DB::rollback();
+
             Log::error('Stripe API Error: ' . $e->getMessage());
         } catch (\Exception $e) {
+            DB::rollback();
+
             Log::error('General Error: ' . $e->getMessage());
         }
-    }
+
+   }
 }

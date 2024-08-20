@@ -6,6 +6,7 @@ use App\Http\Requests\UserRequest;
 use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\User;
+use Carbon\Carbon;
 use Hash;
 use Illuminate\Http\Request;
 use Stripe\Stripe;
@@ -57,58 +58,63 @@ class AccountController extends Controller
 
 
     public function update_payments(){
-        
-    
+
+
 
 
             return view('Update_Payments');
 
-   
-        
+
+
 
     }
 
     public function updateCard(Request $request)
     {
-        Stripe::setApiKey(env('STRIPE_SECRET'));
 
-        $user = Auth::user();
+            Stripe::setApiKey(env('STRIPE_SECRET'));
 
-        try {
-            // Create a PaymentMethod using the token
-            $paymentMethod = PaymentMethod::create([
-                'type' => 'card',
-                'card' => [
-                    'token' => $request->token,
-                ],
-            ]);
+            $user = Auth::user();
 
-            // Retrieve the customer from Stripe
-            $customer = Customer::retrieve($user->stripe_id);
+            try {
+                // Create a PaymentMethod using the token
+                $paymentMethod =PaymentMethod::create([
+                    'type' => 'card',
+                    'card' => [
+                        'token' => $request->token,
+                    ],
+                ]);
 
-            // Attach the PaymentMethod to the customer
-            $paymentMethod->attach(['customer' => $user->stripe_id]);
+                // Retrieve the customer from Stripe
+                $customer = Customer::retrieve($user->stripe_id);
 
-            // Set the new PaymentMethod as the default payment method for the customer
-            $customer->invoice_settings->default_payment_method = $paymentMethod->id;
-            $customer->save();
+                // Attach the PaymentMethod to the customer
+                $paymentMethod->attach(['customer' => $user->stripe_id]);
 
-            // Update user model with card details
-            $user->pm_type = $paymentMethod->card->brand;
-            $user->pm_last_four = $paymentMethod->card->last4;
-            $user->trial_ends_at = now()->addDays(30); // Assuming a 30-day trial period
-            $user->save();
+                // Set the new PaymentMethod as the default payment method for the customer
+                $customer->invoice_settings->default_payment_method = $paymentMethod->id;
+                $customer->save();
 
-            Log::info('Card updated successfully for customer: ' . $customer->id);
-            return response()->json(['success' => true]);
-        } catch (\Exception $e) {
-            Log::error('Error updating card: ' . $e->getMessage());
-            return response()->json(['success' => false, 'error' => $e->getMessage()]);
-        }
+                // Update user model with card details
+                $user->pm_type = $paymentMethod->card->brand;
+                $user->pm_last_four = $paymentMethod->card->last4;
+
+                // Save the expiration date from the user input
+                $user->trial_ends_at = Carbon::createFromFormat('m/y', $request->expiration_date)->endOfMonth();
+                $user->save();
+
+                Log::info('Card updated successfully for customer: ' . $customer->id);
+                return response()->json(['success' => true]);
+            } catch (\Exception $e) {
+                Log::error('Error updating card: ' . $e->getMessage());
+                return response()->json(['success' => false, 'error' => $e->getMessage()]);
+            }
+
+
     }
-    
-    
-    
+
+
+
 
 
 

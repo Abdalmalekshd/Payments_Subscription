@@ -112,9 +112,15 @@ class PaymentController extends Controller
                 $currentPeriodEnd = Carbon::createFromTimestamp($stripeSubscription->current_period_end);
 
                 // Check if subscription already exists
-                $subscription = Subscription::where('user_id', $userId)->first();
+                $subscription = Subscription::where('user_id', $userId)->where('status','active')->first();
 
-                if (!$subscription) {
+                if ($subscription) {
+                    // Update existing subscription
+                    $subscription->update([
+                        'status' => 'expired',
+                    ]);
+                }
+
                     // Create a new subscription if it doesn't exist
                     $subscription = Subscription::create([
                         'user_id' => $userId,
@@ -126,18 +132,7 @@ class PaymentController extends Controller
                         'current_period_start' => $currentPeriodStart,
                         'current_period_end' => $currentPeriodEnd,
                     ]);
-                } else {
-                    // Update existing subscription
-                    $subscription->update([
-                        'subscription_id' => $subscriptionId,
-                        'stripe_price_id' => $price_id,
-                        'status' => $stripeSubscription->status,
-                        'plan_id' => $planId,
-                        'plan_type' => $plan_type,
-                        'current_period_start' => $currentPeriodStart,
-                        'current_period_end' => $currentPeriodEnd,
-                    ]);
-                }
+
 
                 return redirect()->route('subscriptions')->with(['success' => 'Subscription successfully updated!']);
             } catch (\Exception $e) {

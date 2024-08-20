@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Subscription;
+use DB;
 use Stripe\StripeClient;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -29,9 +30,10 @@ use Illuminate\Support\Facades\Log;class ChargeUserSubscription implements Shoul
             return;
         }
 
-        $stripeClient = new StripeClient($stripeSecretKey);
+        $stripeClient = new \Stripe\StripeClient($stripeSecretKey);
 
         try {
+            DB::beginTransaction();
             // Retrieve the subscription from Stripe
             $subscriptionId = $this->subscription->subscription_id;
             $stripeSubscription = $stripeClient->subscriptions->retrieve($subscriptionId);
@@ -54,12 +56,33 @@ use Illuminate\Support\Facades\Log;class ChargeUserSubscription implements Shoul
             ]);
 
             if ($paymentIntent->status === 'succeeded') {
+                // Update current subscription to expired
                 $this->subscription->update([
+                    'status' => 'expired',
+                ]);
+
+                // Create a new subscription
+                $newSubscription = $stripeClient->subscriptions->create([
+                    'customer' => $stripeSubscription->customer,
+                    'items' => [['price' => $priceId]],
+                    'default_payment_method' => $stripeSubscription->default_payment_method,
+                ]);
+
+
+
+                // Save the new subscription details in the database
+                Subscription::create([
+                    'user_id' => $this->subscription->user->id,
+                    'plan_id' =>$this->subscription->plan_id,
                     'status' => 'active',
+                    'plan_type' => $this->subscription->plan_type,
                     'current_period_start' => now(),
                     'current_period_end' => $this->subscription->plan_type === 'year' ? now()->addYear() : now()->addMonth(),
+                    'subscription_id' => $newSubscription->id,
+                    'stripe_price_id' => $priceId,
                 ]);
-                Log::info('Subscription charged successfully: ' . $this->subscription->id);
+                DB::commit();
+                Log::info('Subscription charged and renewed successfully: ' . $newSubscription->id);
             } else {
                 $this->subscription->update([
                     'status' => 'past_due',
@@ -67,6 +90,7 @@ use Illuminate\Support\Facades\Log;class ChargeUserSubscription implements Shoul
                 Log::error('Payment failed for subscription: ' . $this->subscription->id);
             }
         } catch (\Stripe\Exception\ApiErrorException $e) {
+            DB::rollback();
             Log::error('Stripe API Error: ' . $e->getMessage());
         }
 

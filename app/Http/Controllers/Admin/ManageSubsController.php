@@ -7,10 +7,13 @@ use App\Models\Subscription;
 use App\Models\User;
 use App\Models\User_Product;
 use Illuminate\Http\Request;
+use Log;
 use Stripe\Stripe;
 use Stripe\Subscription as StripeSubscription;
 use Stripe\Refund;
 use Stripe\Invoice;
+
+use function PHPUnit\Framework\returnValue;
 
 class ManageSubsController extends Controller
 {
@@ -40,29 +43,30 @@ class ManageSubsController extends Controller
      {
 
              $user = User::find($id);
-             $subscription = Subscription::where('user_id', $user->id)->first();
+             $subscription = Subscription::where('user_id', $user->id)->where('status','active')->first();
 
-             if (!$subscription || $subscription->status === 'canceled') {
+             if (!$subscription) {
                  return redirect()->back()->withErrors('No subscription found.');
              }
 
              // Set Stripe secret key
-             Stripe::setApiKey(env('STRIPE_SECRET'));
+                Stripe::setApiKey(env('STRIPE_SECRET'));
 
              // Retrieve the subscription from Stripe
-             $stripeSubscription = StripeSubscription::retrieve($subscription->subscription_id);
+         $stripeSubscription = StripeSubscription::retrieve($subscription->subscription_id);
 
              // Cancel the subscription immediately
              $stripeSubscription->cancel();
 
              // Retrieve the latest invoice to process a refund
-             $invoice = Invoice::all([
+                 $invoice = Invoice::all([
                  'subscription' => $subscription->subscription_id,
                  'limit' => 1
              ])->data[0];
+             Log::info('Subscription ID: ' . $subscription->subscription_id);
 
              if ($invoice) {
-                 try {
+                //  try {
                      // Create a refund
                      Refund::create([
                          'charge' => $invoice->charge,
@@ -72,12 +76,16 @@ class ManageSubsController extends Controller
                      // Update the subscription status in your database
                      $subscription->status = 'canceled';
                      $subscription->save();
+
+                    Log::info('Subscription canceled: ' . $subscription->subscription_id);
                      return redirect()->back()->with(['success'=> 'Subscription has been canceled and a refund has been processed.']);
 
-                 } catch (\Exception $e) {
-                     return redirect()->back()->with(['error'=> 'Something went wrong please try agian later']);
-                 }
+                //  } catch (\Exception $e) {
+                //     Log::info('Subscription ID: ' . $subscription->subscription_id);
+                //      return redirect()->back()->with(['error'=> 'Something went wrong please try agian later']);
+                //  }
              } else {
+                Log::info('Subscription ID: ' . $subscription->subscription_id);
                  return redirect()->back()->withErrors('No invoice found to process refund.');
              }
 
@@ -89,12 +97,13 @@ class ManageSubsController extends Controller
 
      public function cancel_user_product_subscription($id)
      {
+
          try {
              // Find the user
              $user = User::findOrFail($id);
 
              // Find the subscription for the user
-             $subscription = User_Product::where('user_id', $user->id)
+                $subscription = User_Product::where('user_id', $user->id)
                  ->where('status', 'Subscribe')
                  ->firstOrFail();
 
@@ -107,7 +116,7 @@ class ManageSubsController extends Controller
              Stripe::setApiKey(env('STRIPE_SECRET'));
 
              // Retrieve the subscription from Stripe
-             $stripeSubscription = StripeSubscription::retrieve($subscription->subscription_id);
+                $stripeSubscription = StripeSubscription::retrieve($subscription->subscription_id);
 
              // Check if the subscription is valid
              if (!$stripeSubscription || $stripeSubscription->status !== 'active') {

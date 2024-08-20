@@ -51,12 +51,13 @@
                                 <td>{{ $subs->status }}</td>
                                 <td>{{ $subs->subscription_start_date }}</td>
                                 <td>{{ $subs->subscription_end_date }}</td>
-
+                                @if ($subs->status == 'Subscribe')
                                 <td><a href="{{ route('cancel.user.product.sub',$subs->User->id) }}" class="btn btn-danger">Cancel Subscription</a></td>
+                                @endif
                             </tr>
                         @endforeach
                         @else
-                        <h3>There is no users in here right now.</h3>
+                        <h3>There is no products subscriptions in here right now.</h3>
                         @endif
 
                         </tbody>
