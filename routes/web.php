@@ -43,7 +43,16 @@ use App\Http\Controllers\PurchaseController;
 
 
         //Start Products And Purchases Routes
-    Route::get('products',[ProductsController::class,'products'])->name('home');
+
+
+
+        Route::get('products',[ProductsController::class,'products'])->name('home');
+
+        Route::get('addproducts',[ProductsController::class,'AddProductsForm'])->name('Add.products');
+
+        Route::post('createproducts',[ProductsController::class,'createproducts'])->name('Create.products');
+
+
 
     Route::get('manage_proddutcs_subs',[ProductsController::class,'manageProductssubs'])->name('product.subscription');
 
@@ -65,6 +74,7 @@ use App\Http\Controllers\PurchaseController;
     Route::post('updateAccount',[AccountController::class,'UpdateAccount'])->name('UpdateAccount');
     //End Account Routes
 
+
     //Start subscriptions Routes
 
     Route::get('subscriptions',[AccountController::class,'subscriptions'])->name('subscriptions');
@@ -83,8 +93,8 @@ use App\Http\Controllers\PurchaseController;
 
     Route::get('update_payments',[AccountController::class,'update_payments'])->name('update_payments');
 
-    
-    
+
+
     Route::post('/update-card', [AccountController::class, 'updateCard'])->name('update.card');
 
     //End update payments Routes

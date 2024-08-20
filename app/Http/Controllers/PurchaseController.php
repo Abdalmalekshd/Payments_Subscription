@@ -105,6 +105,7 @@ class PurchaseController extends Controller
             return redirect()->route('home')->withErrors('No subscription found in session.');
         }
 
+
         // Retrieve the product and user details
         $product = Product::find($productId);
 
@@ -117,10 +118,17 @@ class PurchaseController extends Controller
                 default => null
             };
 
+            $userProduct=User_Product::where('product_id' , $productId)->where('user_id',$user->id)->where('status','Subscribe')->first();
+            if($userProduct){
+                $userProduct->update([
+                    'status'=>'expired'
+                ]);
+            }
             // Add or update record in user_products table
-            $userProduct = User_Product::updateOrCreate(
-                ['product_id' => $productId, 'user_id' => $user->id],
+              User_Product::Create(
+
                 [
+                    'product_id' => $productId, 'user_id' => $user->id,
                     'subscription_id' => $subscriptionId,
                     'status' => ($status === 'one_time') ? 'Purchased For One Time' : 'Subscribe',
                     'purchase_type' => $status,

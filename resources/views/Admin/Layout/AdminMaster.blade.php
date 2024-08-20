@@ -36,7 +36,7 @@
             <nav class="navbar navbar-expand-lg text-light navbar-custom justify-content-center">
                 <ul class="navbar-nav">
                     <li class="nav-item"><a class="nav-link" href="{{route('dashboard')}}">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{route('Add.products')}}">Add Products</a></li>
+
                     <li class="nav-item"><a class="nav-link" href="{{ route('show.products') }}">Products</a></li>
                 </ul>
             </nav>

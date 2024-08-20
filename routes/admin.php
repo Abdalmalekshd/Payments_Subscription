@@ -26,9 +26,7 @@ Route::group(['middleware'=>['auth:admin'],'prefix'=>'admin'],function(){
     Route::get('Dashboard',[DashboardController::class,'dashboard'])->name('dashboard');
     //End Dashboard Routes
 
-    Route::get('addproducts',[AdminProductsController::class,'AddProductsForm'])->name('Add.products');
 
-    Route::post('createproducts',[AdminProductsController::class,'createproducts'])->name('Create.products');
 
     Route::get('products',[AdminProductsController::class,'ShowProducts'])->name('show.products');
 

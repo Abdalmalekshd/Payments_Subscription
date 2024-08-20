@@ -18,9 +18,9 @@ class CreateUserProductsTable extends Migration
             $table->integer('product_id')->unsigned();
             $table->integer('user_id')->unsigned();
             $table->string('status');
-            $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade')->onUpdate('cascade');
+            $table->timestamps();
 
         });
     }

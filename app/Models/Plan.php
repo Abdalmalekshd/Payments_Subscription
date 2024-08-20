@@ -24,4 +24,8 @@ class Plan extends Model
         return $this->hasMany(Subscription::class);
         }
 
+
+        public function product(){
+            return $this->hasMany(Product_Plan::class);
+            }
 }

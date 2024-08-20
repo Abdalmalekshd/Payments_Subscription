@@ -19,7 +19,9 @@ class Product extends Model
         return $this->hasMany(User_Product::class);
         }
 
-
+        public function plan(){
+            return $this->hasMany(Product_Plan::class);
+            }
 
         public function createStripePlans()
         {

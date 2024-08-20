@@ -47,6 +47,8 @@ namespace App\Models{
  * @property array $features
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product_Plan> $product
+ * @property-read int|null $product_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Subscription> $subscriptionplan
  * @property-read int|null $subscriptionplan_count
  * @method static \Illuminate\Database\Eloquent\Builder|Plan newModelQuery()
@@ -80,6 +82,8 @@ namespace App\Models{
  * @property string $stripe_monthly_price_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product_Plan> $plan
+ * @property-read int|null $plan_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User_Product> $product_UserProduct
  * @property-read int|null $product__user_product_count
  * @method static \Illuminate\Database\Eloquent\Builder|Product newModelQuery()
@@ -98,6 +102,19 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Product whereUpdatedAt($value)
  */
 	class Product extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\Product_Plan
+ *
+ * @property-read \App\Models\Plan|null $plansproducts
+ * @property-read \App\Models\Product|null $productsplans
+ * @method static \Illuminate\Database\Eloquent\Builder|Product_Plan newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Product_Plan newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Product_Plan query()
+ */
+	class Product_Plan extends \Eloquent {}
 }
 
 namespace App\Models{
