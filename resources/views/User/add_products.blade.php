@@ -1,5 +1,5 @@
-@extends('Admin.Layout.AdminMaster')
-@section('Title','Dashboard')
+@extends('Layout.UserMaster')
+@section('Title','Add Product')
 @section('content')
   @include('Layout.SuccessMessage')
   @include('Layout.ErrorMessage')

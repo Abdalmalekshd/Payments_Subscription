@@ -97,7 +97,8 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="payment-form">
+                <form id="payment-form" method="Post">
+                    @csrf
                     <div class="form-group">
                         <label for="card-element">Credit or debit card</label>
                         <div id="card-element" class="form-control">
@@ -114,7 +115,8 @@
 
 <script src="https://js.stripe.com/v3/"></script>
 <script>
-    var stripe = Stripe('{{ env('STRIPE_KEY') }}');
+
+    var stripe = Stripe('{{config('services.stripe.pk')}}');
     var elements = stripe.elements();
     var card = elements.create('card', {
         style: {

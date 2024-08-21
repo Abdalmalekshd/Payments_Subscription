@@ -35,7 +35,7 @@ class ProductsController extends Controller
 
 
      public function AddProductsForm(){
-        return view('Admin.add_products');
+        return view('User.add_products');
     }
 
     public function createproducts(Request $req){

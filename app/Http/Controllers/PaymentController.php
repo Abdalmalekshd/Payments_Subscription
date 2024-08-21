@@ -27,7 +27,7 @@ class PaymentController extends Controller
                     $plan = Plan::findOrFail($plan_id);
                     if ($plan) {
                         // Set Stripe secret key
-                        Stripe::setApiKey(env('STRIPE_SECRET'));
+                        Stripe::setApiKey(config('services.stripe.sk'));
 
                         // Create or retrieve Stripe customer
                         if (!$user->stripe_id) {
