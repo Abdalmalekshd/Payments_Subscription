@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Stripe\Stripe;
 use Stripe\StripeClient;
 use Stripe\Subscription;
+use Log;
 
 class PurchaseController extends Controller
 {

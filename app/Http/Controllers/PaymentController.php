@@ -13,6 +13,8 @@ use Stripe\Stripe;
 use App\Models\Plan;
 use Carbon\Carbon;
 use Stripe\Checkout\Session as StripeSession;
+use Log;
+
 class PaymentController extends Controller
 {
 
@@ -80,7 +82,7 @@ class PaymentController extends Controller
 
         public function success(Request $request)
         {
-            Stripe::setApiKey(env('STRIPE_SECRET'));
+            Stripe::setApiKey(config('services.stripe.sk'));
 
             $userId = $request->get('id');
             $planId = $request->get('plan_id');
@@ -149,11 +151,11 @@ class PaymentController extends Controller
 
     public function pause(Request $request)
     {
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe::setApiKey(config('services.stripe.sk'));
 
 
         $user = Auth::user();
-        $subscription = Subscription::where('user_id', $user->id)->first();
+        $subscription = Subscription::where('user_id', $user->id)->where('status','active')->first();
 
         $subscription_id = $subscription->subscription_id;
 
@@ -176,10 +178,10 @@ class PaymentController extends Controller
 
     public function resume(Request $request)
     {
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe::setApiKey(config('services.stripe.sk'));
 
         $user = Auth::user();
-        $subscription = Subscription::where('user_id', $user->id)->first();
+        $subscription = Subscription::where('user_id', $user->id)->where('status','paused')->first();
 
         $subscription_id = $subscription->subscription_id;
 
@@ -205,17 +207,19 @@ class PaymentController extends Controller
     {
 
             $user = Auth::user();
-            $subscription = Subscription::where('user_id', $user->id)->first();
+                 $subscription = Subscription::where('user_id', $user->id)->where('status','active')->first();
 
-            if (!$subscription || $subscription->status === 'canceled') {
+            if (!$subscription) {
                 return redirect()->back()->withErrors('No subscription found.');
             }
 
+            try {
+
             // Set Stripe secret key
-            Stripe::setApiKey(env('STRIPE_SECRET'));
+            Stripe::setApiKey(config('services.stripe.sk'));
 
             // Retrieve the subscription from Stripe
-            $stripeSubscription = StripeSubscription::retrieve($subscription->subscription_id);
+               $stripeSubscription = StripeSubscription::retrieve($subscription->subscription_id);
 
             // Cancel the subscription immediately
             $stripeSubscription->cancel();
@@ -227,7 +231,7 @@ class PaymentController extends Controller
             ])->data[0];
 
             if ($invoice) {
-                try {
+
                     // Create a refund
                     Refund::create([
                         'charge' => $invoice->charge,
@@ -239,15 +243,18 @@ class PaymentController extends Controller
                     $subscription->save();
                     return redirect()->back()->with(['success'=> 'Your subscription has been canceled and a refund has been processed.']);
 
-                } catch (\Exception $e) {
-                    return redirect()->back()->with(['error'=> 'Something went wrong please try agian later']);
 
-                }
             } else {
+
+
                 return redirect()->back()->withErrors('No invoice found to process refund.');
             }
 
+        } catch (\Exception $e) {
+            Log::error('Error updating card: ' . $e->getMessage());
+            return redirect()->back()->with(['error'=> 'Something went wrong please try agian later']);
 
+        }
     }
 
 }

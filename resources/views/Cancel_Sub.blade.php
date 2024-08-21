@@ -38,7 +38,7 @@
                     <div class="text-center">
 
                         @if(Auth::user()->subscriptionplan)
-                        @if (Auth::user()->subscriptionplan->status === 'paused' ?? '')
+                        @if (\app\models\Subscription::where('user_id', Auth::user()->id)->where('status','paused')->first() ?? '')
                         <button onclick="event.preventDefault(); document.getElementById('resume-form').submit();" class="btn btn-custom">
                             Resume Subscription
                         </button>

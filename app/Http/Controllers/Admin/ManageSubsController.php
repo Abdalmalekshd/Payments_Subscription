@@ -50,7 +50,7 @@ class ManageSubsController extends Controller
              }
 
              // Set Stripe secret key
-                Stripe::setApiKey(env('STRIPE_SECRET'));
+                Stripe::setApiKey(config('services.stripe.sk'));
 
              // Retrieve the subscription from Stripe
          $stripeSubscription = StripeSubscription::retrieve($subscription->subscription_id);
@@ -113,7 +113,7 @@ class ManageSubsController extends Controller
              }
 
              // Set Stripe secret key
-             Stripe::setApiKey(env('STRIPE_SECRET'));
+             Stripe::setApiKey(config('services.stripe.sk'));
 
              // Retrieve the subscription from Stripe
                 $stripeSubscription = StripeSubscription::retrieve($subscription->subscription_id);

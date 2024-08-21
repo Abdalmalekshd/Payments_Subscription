@@ -116,8 +116,11 @@
 <script src="https://js.stripe.com/v3/"></script>
 <script>
 
+    // إعداد Stripe باستخدام مفتاح الشراء (Publishable Key)
     var stripe = Stripe('{{config('services.stripe.pk')}}');
     var elements = stripe.elements();
+
+    // إنشاء عنصر البطاقة
     var card = elements.create('card', {
         style: {
             base: {
@@ -133,40 +136,54 @@
             }
         }
     });
+
+    // ربط العنصر بالمكون في HTML
     card.mount('#card-element');
 
+    // الحصول على النموذج
     var form = document.getElementById('payment-form');
-    form.addEventListener('submit', function(event) {
+
+    // الاستماع لحدث الإرسال للنموذج
+    form.addEventListener('submit', async function(event) {
         event.preventDefault();
 
-        stripe.createToken(card).then(function(result) {
-            if (result.error) {
-                var errorElement = document.getElementById('card-errors');
-                errorElement.textContent = result.error.message;
-                alert('Error: ' + result.error.message);
-            } else {
-                fetch('/update-card', {
+        // إنشاء رمز البطاقة (Token)
+        const { token, error } = await stripe.createToken(card);
+
+        if (error) {
+            // في حالة وجود خطأ، إظهاره للمستخدم
+            var errorElement = document.getElementById('card-errors');
+            errorElement.textContent = error.message;
+            alert('Error: ' + error.message);
+        } else {
+            try {
+                // إرسال الرمز للخادم لمعالجة البطاقة وتحديث البيانات
+                const response = await fetch('/update-card', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
-                    body: JSON.stringify({token: result.token.id})
-                }).then(response => {
-                    return response.json();
-                }).then(data => {
-                    if (data.success) {
-                        alert('Card updated successfully!');
-                        $('#updateCardModal').modal('hide'); // Hide modal on success
-                        location.reload(); // Reload page to reflect changes
-                    } else {
-                        alert('Failed to update card. Error: ' + (data.error || 'Unknown error occurred.'));
-                        alert('Failed to update card.');
-                    }
+                    body: JSON.stringify({ token: token.id })
                 });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // في حالة نجاح التحديث، إغلاق النافذة المنبثقة وتحديث الصفحة
+                    alert('Card updated successfully!');
+                    $('#updateCardModal').modal('hide');
+                    location.reload();
+                } else {
+                    // في حالة الفشل، إظهار رسالة خطأ
+                    alert('Failed to update card. Error: ' + (data.error || 'Unknown error occurred.'));
+                }
+            } catch (err) {
+                // التعامل مع أي أخطاء غير متوقعة
+                alert('Failed to update card due to a network or server error.');
+                console.error('Error:', err);
             }
-        });
+        }
     });
 </script>
-
 @endsection
