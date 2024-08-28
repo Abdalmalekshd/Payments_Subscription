@@ -1,10 +1,12 @@
 <?php
 
     use App\Http\Controllers\AccountController;
-    use App\Http\Controllers\SubscribePurchaseController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\SubscribePurchaseController;
 use Illuminate\Support\Facades\Route;
     use App\Http\Controllers\ShopifyController;
     use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PlansController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\PurchaseController;
 
@@ -127,5 +129,36 @@ use App\Http\Controllers\PurchaseController;
 
     //End Cancel && Pause && Resume subscription Routes
 
+
+    //Start Plans Route
+    Route::get('Manage_plans',[PlansController::class,'ShowPlans'])->name('Manage.Plans');
+
+    Route::get('add_plans',[PlansController::class,'AddPlansForm'])->name('add.plans.form');
+
+    Route::post('create_plan',[PlansController::class,'create_plan'])->name('Create.plans');
+
+    Route::get('edit_plan/{id}',[PlansController::class,'edit_plan'])->name('edit.plan');
+
+
+    Route::post('update_plan',[PlansController::class,'updatePlan'])->name('update.plan');
+
+
+
+    Route::get('dlt_plan/{id}',[PlansController::class,'deletePlan'])->name('delete.plan');
+
+
+    //End Plans Route
+
+
+
+        //Start Customer Route
+
+
+
+        Route::get('add_customer',[CustomerController::class,'AddCustomerForm'])->name('add.customer.form');
+
+        Route::post('create_customer',[CustomerController::class,'create_customer'])->name('Create.customer');
+
+        //End Plans Route
 
     });

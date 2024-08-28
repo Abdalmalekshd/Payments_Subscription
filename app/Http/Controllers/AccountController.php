@@ -22,7 +22,7 @@ class AccountController extends Controller
 
 
         $user=User::where('id',Auth::user()->id)->first();
-        return view('account',compact('user'));
+        return view('User.account',compact('user'));
     }
 
 
@@ -52,7 +52,8 @@ class AccountController extends Controller
 
 
         $plans=Plan::get();
-        return view('subscriptions',compact('plans'));
+        $subscription=Subscription::where('user_id',Auth::user()->id)->where('status','active')->first();
+        return view('User.subscriptions',compact('plans','subscription'));
     }
 
 
@@ -61,7 +62,7 @@ class AccountController extends Controller
 
 
 
-            return view('Update_Payments');
+            return view('User.Update_Payments');
 
 
 
@@ -83,7 +84,7 @@ class AccountController extends Controller
                 ],
             ]);
 
-            // Retrieve the customer from Stripe
+
             $customer = Customer::retrieve($user->stripe_id);
 
             // Attach the PaymentMethod to the customer
@@ -100,7 +101,7 @@ class AccountController extends Controller
             $user->card_expiration_month = $paymentMethod->card->exp_month;
             $user->card_expiration_year = $paymentMethod->card->exp_year;
 
-            // Assuming the trial_ends_at field is used for something else, otherwise remove this line
+
             $user->trial_ends_at = $request->expiration_date;
 
             $user->save();
@@ -120,19 +121,19 @@ class AccountController extends Controller
 
     public function receipts(){
 
-        // Set Stripe secret key
+
     Stripe::setApiKey(config('services.stripe.sk'));
 
-    // Retrieve Stripe customer ID from authenticated user
+
     $customerStripeId = Auth::user()->stripe_id;
 
-    // Fetch all subscriptions for the customer
-    $stripeSubscriptions = \Stripe\Subscription::all(['customer' => $customerStripeId]);
+
+    $stripeSubscriptions = StripeSubscription::all(['customer' => $customerStripeId]);
 
     $paymentData = [];
     foreach ($stripeSubscriptions->data as $subscription) {
         foreach ($subscription->items->data as $item) {
-            // Retrieve the price details
+
             $price = \Stripe\Price::retrieve($item->price->id);
             $product = \Stripe\Product::retrieve($price->product);
 
@@ -141,19 +142,19 @@ class AccountController extends Controller
                 'currency' => strtoupper($price->currency),
                 'status' => $subscription->status,
                 'plan_name' => $product->name,
-                 // Use metadata from the price
+
                 'start_date' => $subscription->current_period_start ? date('Y-m-d', $subscription->current_period_start) : 'N/A',
                 'end_date' => $subscription->current_period_end ? date('Y-m-d', $subscription->current_period_end) : 'N/A',
             ];
         }
     }
 
-    return view('receipts', ['payments' => $paymentData]);
+    return view('User.receipts', ['payments' => $paymentData]);
 
     }
 
     public function cancel_sub(){
-        return view('Cancel_Sub');
+        return view('User.Cancel_Sub');
     }
 
 

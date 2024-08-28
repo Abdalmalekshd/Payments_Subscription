@@ -21,7 +21,12 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'stripe_id '
+        'card_expiration_month',
+        'card_expiration_year',
+        'stripe_id',
+        'pm_type',
+        'pm_last_four',
+        'trial_ends_at',
     ];
 
     /**
@@ -51,8 +56,12 @@ class User extends Authenticatable
 
 
 
-    public function User_UserProduct(){
-        return $this->hasMany(User_Product::class);
+        public function customers(){
+            return $this->hasMany(Customer::class);
+            }
+
+
+            public function Plan(){
+                return $this->hasMany(Plan::class);
         }
-        
 }

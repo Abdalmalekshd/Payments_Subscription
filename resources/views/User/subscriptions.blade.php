@@ -27,10 +27,12 @@
                 </div>
                 <div class="col-12 col-md-9">
                     <div class="mb-4">
-                        <h2>Your Subscription Plan is:{{Auth::user()->subscriptionplan->plan->name ?? ''}}</h2>
-                        <p>@if (Auth::user()->subscriptionplan)
-                            Your subscription will next renew on {{ Auth::user()->subscriptionplan->current_period_end_formatted}} for {{ Auth::user()->subscriptionplan->plan_type === 'year' ? Auth::user()->subscriptionplan->plan->yearly_price : Auth::user()->subscriptionplan->plan->monthly_price  }}$.
-                        @endif</p>
+                        <h2>Your Subscription Plan is:{{ $subscription->plan->name ?? ''}}</h2>
+                        <p>
+                            @if ( $subscription)
+                            Your subscription will next renew on {{  $subscription->current_period_end_formatted}} for {{ $subscription->plan_type === 'year' ? $subscription->plan->yearly_price : $subscription->plan->monthly_price  }}$.
+                        @endif
+                    </p>
                     </div>
                     <div class="row">
                         <div class="col-md-12">
@@ -43,10 +45,23 @@
                             <div class="mb-4">
                                 <form id="planForm" method="post" action="{{ route('process.payment') }}">
                                     @csrf
+                                    
+                                    <span class="span">
+                                        <input type="radio" name="plan_type" value="daily">
+                                        DAILY
+                                    </span>
+
+
+                                    <span class="span">
+                                        <input type="radio" name="plan_type" value="weekly">
+                                        WEEKLY
+                                    </span>
+
                                     <span class="span">
                                         <input type="radio" name="plan_type" value="month">
                                         MONTH
                                     </span>
+
 
                                     <span class="span">
                                         <input type="radio" name="plan_type" value="year">
@@ -59,33 +74,31 @@
                         </div>
                     </div>
                     <div class="row planscards">
-
                         @foreach ($plans as $plan)
                         <div class="col-md-6 mb-3">
                             <div class="card card-plan"
                                  data-plan-id="{{ $plan->id }}"
                                  data-plan="{{ $plan->name }}"
-                                 data-price-id="{{ $plan->monthly_price_id }}"
+                                 data-daily-price-id="{{ $plan->daily_price_id }}"
+                                 data-weekly-price-id="{{ $plan->weekly_price_id }}"
+                                 data-monthly-price-id="{{ $plan->monthly_price_id }}"
                                  data-yearly-price-id="{{ $plan->yearly_price_id }}"
-                                 data-price="{{ $plan->monthly_price }}">
+                                 data-daily-price="{{ $plan->daily_price }}"
+                                 data-weekly-price="{{ $plan->weekly_price }}"
+                                 data-monthly-price="{{ $plan->monthly_price }}"
+                                 data-yearly-price="{{ $plan->yearly_price }}">
                                 <div class="plan-body">
                                     <h3>{{ $plan->name }}</h3>
                                     <p class="h4">${{ $plan->monthly_price }}</p>
                                 </div>
                             </div>
                             <div class="plan-benfites">
-                                @foreach ($plan->features as $feature)
-                                    <div>{{ $feature }}</div>
-                                @endforeach
-                             </div>
+                                <div>{{ $plan->plan_description }}</div>
+                            </div>
                         </div>
-
                         @endforeach
-                        @error('selectedPlanid')
-                        <div class="text-danger">{{ $message }}</div>
-                        @enderror
-
                     </div>
+
                     <div class="text-center">
                         <input type="submit" class="btn btn-custom" value="Update plan">
                     </div>
@@ -107,7 +120,7 @@
                 plans.forEach(p => p.classList.remove('selected'));
                 this.classList.add('selected');
 
-                const oldInputs = form.querySelectorAll('input[name="selectedPlan"], input[name="planPrice"], input[name="selectedPlanid"], input[name="price_id"], input[name="yearly_price_id"]');
+                const oldInputs = form.querySelectorAll('input[name="selectedPlan"], input[name="selectedPlanid"], input[name="price_id"], input[name="yearly_price_id"]');
                 oldInputs.forEach(input => input.remove());
 
                 const hiddenPlanInput = document.createElement('input');
@@ -122,23 +135,38 @@
                 hiddenPlanIdInput.value = this.getAttribute('data-plan-id');
                 form.appendChild(hiddenPlanIdInput);
 
+                const selectedPlanType = form.querySelector('input[name="plan_type"]:checked').value;
+                let priceId;
+
+                switch (selectedPlanType) {
+                    case 'daily':
+                        priceId = this.getAttribute('data-daily-price-id');
+                        break;
+                    case 'weekly':
+                        priceId = this.getAttribute('data-weekly-price-id');
+                        break;
+                    case 'month':
+                        priceId = this.getAttribute('data-monthly-price-id');
+                        break;
+                    case 'year':
+                        priceId = this.getAttribute('data-yearly-price-id');
+                        break;
+                }
+
                 const hiddenPriceIdInput = document.createElement('input');
                 hiddenPriceIdInput.type = 'hidden';
                 hiddenPriceIdInput.name = 'price_id';
-                hiddenPriceIdInput.value = this.getAttribute('data-price-id'); // Monthly price ID
+                hiddenPriceIdInput.value = priceId;
                 form.appendChild(hiddenPriceIdInput);
+            });
+        });
 
-                const hiddenYearlyPriceIdInput = document.createElement('input');
-                hiddenYearlyPriceIdInput.type = 'hidden';
-                hiddenYearlyPriceIdInput.name = 'yearly_price_id';
-                hiddenYearlyPriceIdInput.value = this.getAttribute('data-yearly-price-id'); // Yearly price ID
-                form.appendChild(hiddenYearlyPriceIdInput);
+        spans.forEach(span => {
+            span.addEventListener('click', function() {
+                spans.forEach(s => s.classList.remove('selected'));
+                this.classList.add('selected');
 
-                const hiddenPriceInput = document.createElement('input');
-                hiddenPriceInput.type = 'hidden';
-                hiddenPriceInput.name = 'planPrice';
-                hiddenPriceInput.value = this.getAttribute('data-price');
-                form.appendChild(hiddenPriceInput);
+                this.querySelector('input[type="radio"]').checked = true;
             });
         });
 

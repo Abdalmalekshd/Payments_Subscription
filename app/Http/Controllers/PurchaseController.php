@@ -25,10 +25,10 @@ class PurchaseController extends Controller
         return response()->json(['error' => 'Product not found'], 404);
     }
 
-    // Create Stripe plans if they do not exist
+
     $product->createStripePlans();
 
-    // Get the correct plan ID based on purchase type
+
     $priceId = null;
     switch ($purchaseType) {
         case 'one_time':
@@ -53,7 +53,7 @@ class PurchaseController extends Controller
     Stripe::setApiKey(config('services.stripe.sk'));
 
     try {
-        // Create Stripe customer if not exists
+
         if (!$user->stripe_id) {
             $customer = \Stripe\Customer::create([
                 'email' => $user->email,
@@ -62,7 +62,7 @@ class PurchaseController extends Controller
             $user->save();
         }
 
-        // Create Checkout Session
+
         $session = \Stripe\Checkout\Session::create([
             'payment_method_types' => ['card'],
             'line_items' => [
@@ -76,7 +76,7 @@ class PurchaseController extends Controller
             'cancel_url' => route('Purchase.Cancel'),
             'customer' => $user->stripe_id,
             'metadata' => [
-                'purchase_type' => $purchaseType, // Add the purchase type to metadata
+                'purchase_type' => $purchaseType,
             ],
         ]);
 
@@ -95,11 +95,11 @@ class PurchaseController extends Controller
 
         $user = Auth::user();
 
-        // Verify the session here
+
         Stripe::setApiKey(config('services.stripe.sk'));
         $session = \Stripe\Checkout\Session::retrieve($sessionId);
 
-        // Check if session contains subscription ID
+
         $subscriptionId = $session->subscription ?? null;
 
         if (!$subscriptionId && $status !== 'one_time') {
@@ -107,7 +107,7 @@ class PurchaseController extends Controller
         }
 
 
-        // Retrieve the product and user details
+
         $product = Product::find($productId);
 
         if ($product) {
@@ -125,9 +125,8 @@ class PurchaseController extends Controller
                     'status'=>'expired'
                 ]);
             }
-            // Add or update record in user_products table
-              User_Product::Create(
 
+              User_Product::Create(
                 [
                     'product_id' => $productId, 'user_id' => $user->id,
                     'subscription_id' => $subscriptionId,

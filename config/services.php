@@ -32,8 +32,8 @@ return [
 
     'stripe' => [
         'model'=>App\Models\User::class,
-        'pk' => 'pk_test_51PP0C5GWolDHikV5XteL1dI3cCE66Sh26TfhgzcZdsR2V7S8vv87Uv07MX7oL6Ug3qhJHXpiSapg6Df7UNgjRWt2009rfwXAJj',
-        'sk' => 'sk_test_51PP0C5GWolDHikV5EFd8lt1EBIBQZxKxZPl9XDbKogV3TR1XR7Fdk5hEkg8Nq3VUPTHfHCpqmpD4bqhHY4qAIrMb00JpOiXS9Q',
+        'pk' => env('STRIPE_KEY'),
+        'sk' => env('STRIPE_SECRET'),
     ],
 
 ];

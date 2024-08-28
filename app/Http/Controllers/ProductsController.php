@@ -6,18 +6,26 @@ use App\Models\Product;
 use App\Models\User_Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ProductRequest;
 use App\Traits\UplaodImageTraits;
+use Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Stripe\StripeClient;
+use Stripe\Product as StripeProduct;
+use Stripe\Stripe;
+use Stripe\Price;
 
 class ProductsController extends Controller
 {
+
+    use UplaodImageTraits;
+
     public function products(){
 
         $product=Product::paginate(20);
 
-        return view('Products',['products' => $product]);
+        return view('User.Products',['products' => $product]);
     }
 
 
@@ -28,7 +36,7 @@ class ProductsController extends Controller
         $data['User_products']=User_Product::get();
 
 
-        return view('ManageSubs',$data);
+        return view('User.ManageSubs',$data);
      }
 
 
@@ -38,119 +46,127 @@ class ProductsController extends Controller
         return view('User.add_products');
     }
 
-    public function createproducts(Request $req){
-        try{
+    public function createproducts(ProductRequest $req) {
+        try {
 
             DB::beginTransaction();
 
+            $img = $this->UploadImage('products', $req->image);
 
-            $img=$this->UploadImage('products', $req->image);
+            Stripe::setApiKey(env('STRIPE_SECRET'));
+
+            $price = Price::create([
+                'unit_amount' => $req->price * 100,
+                'currency' => 'usd',
+                'product_data' => [
+                    'name' => $req->name,
+                ],
+            ]);
 
             $product = new Product([
+                'user_id' => Auth::user()->id,
                 'name' => $req->name,
-                'image'=>$img,
-                'price'=>$req->price,
-                'description'=>$req->description,
-
+                'image' => $img,
+                'price' => $req->price,
+                'stripe_price_id' => $price->id,
+                'description' => $req->description,
+                'quantity'    => $req->quantity
             ]);
 
-            $product->createStripePlans();
+            $product->save();
+
             DB::commit();
 
-            return redirect()->back()->with(['success'=>'New Product Added']);
+            return redirect()->back()->with(['success' => 'New Product Added']);
+        } catch (\Exception $ex) {
+            return $ex;
+            DB::rollBack();
 
-        }
-            catch(\Exception $ex){
-
-                return $ex;
-                DB::rollBack();
-
-            return redirect()->back()->with(['error'=>'Error while adding new product']);
-
+            return redirect()->back()->with(['error' => 'Error while adding new product']);
         }
     }
 
 
-    public function UpdateProducts(Request $req){
-        try{
-
-
-        $product=Product::find($req->id);
-        if($product){
-
-
-
-
-
-            $product->update([
-                'name'       =>$req->name,
-                'price'      =>$req->price,
-                'description'=>$req->description,
-
-            ]);
-
-
-            if ($req->hasFile('image')) {
-
-
-                $des ='storage/products/' . $product->image;
-
-
-          if (File::exists($des)) {
-               File::delete($des);
-
-      }
-
-      $img=$this->UploadImage('products',$req->image);
-      $product->image=$img;
-      $product->save();
-    }
-        return redirect()->back();
-        }else{
-            return redirect()->back()->with(['error'=>'Error while deleting product']);
-
-        }
-    }catch(\Exception $ex)
+    public function UpdateProducts(Request $req)
     {
-        return $ex;
-        return redirect()->back()->with(['error'=>'Error while deleting product']);
+        try {
+            $product = Product::where('user_id',Auth::user()->id)->find($req->id);
+            if ($product) {
 
-    }
-
-    }
-
-    public function DeleteProducts($id){
-        $product=Product::find($id);
-        try{
-
-            DB::beginTransaction();
-        if($product){
-
-            if ($product->image) {
+                Stripe::setApiKey(config('services.stripe.sk'));
 
 
-                $des ='storage/products/' . $product->image;
 
 
-          if (File::exists($des)) {
-               File::delete($des);
+                $newPrice = Price::create([
+                    'unit_amount' => $req->price * 100,
+                    'currency' => 'usd',
+                    'product' => $product->stripe_product_id,
+                ]);
 
-      }
 
-            $product->delete();
+                $product->update([
+                    'user_id' => Auth::user()->id,
+                    'name' => $req->name,
+                    'price' => $req->price,
+                    'stripe_price_id' => $newPrice->id,
+                    'description' => $req->description,
+                ]);
 
 
-            DB::commit();
+                if ($req->hasFile('image')) {
+                    $des = 'storage/products/' . $product->image;
 
-            return redirect()->back();
+                    if (File::exists($des)) {
+                        File::delete($des);
+                    }
+
+                    $img = $this->UploadImage('products', $req->image);
+                    $product->image = $img;
+                    $product->save();
+                }
+
+                return redirect()->back()->with(['success' => 'Product updated successfully']);
+            } else {
+                return redirect()->back()->with(['error' => 'Product not found']);
+            }
+        } catch (\Exception $ex) {
+            return redirect()->back()->with(['error' => 'Error while updating product: ' . $ex->getMessage()]);
         }
-
-    }
-    } catch(\Exception $ex){
-        DB::rollBack();
-        return redirect()->back()->with(['error'=>'Error while deleting product']);
-
     }
 
-}
+    public function DeleteProduct($id)
+    {
+        try {
+            $product = Product::find($id);
+            if ($product) {
+
+                Stripe::setApiKey(config('services.stripe.sk'));
+
+
+                $stripeProduct = StripeProduct::retrieve($product->stripe_product_id);
+                $stripeProduct->delete();
+
+
+                $des = 'storage/products/' . $product->image;
+                if (File::exists($des)) {
+                    File::delete($des);
+                }
+
+
+                $product->delete();
+
+                return redirect()->back()->with(['success' => 'Product deleted successfully']);
+            } else {
+                return redirect()->back()->with(['error' => 'Product not found']);
+            }
+        } catch (\Exception $ex) {
+            return redirect()->back()->with(['error' => 'Error while deleting product: ' . $ex->getMessage()]);
+        }
+    }
+
+
+
+
+
 }

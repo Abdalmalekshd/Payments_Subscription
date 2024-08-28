@@ -15,8 +15,8 @@ class AddPmBrandToUsersTable extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
 
-            $table->integer('card_expiration_month');
-            $table->integer('card_expiration_year');
+            $table->integer('card_expiration_month')->nullable();
+            $table->integer('card_expiration_year')->nullable();
         });
     }
 
@@ -28,7 +28,12 @@ class AddPmBrandToUsersTable extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            //
+
+            $table->dropColumn([
+                'card_expiration_month',
+                'card_expiration_year'
+            ]);
+
         });
     }
 }

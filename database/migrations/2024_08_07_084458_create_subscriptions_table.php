@@ -23,7 +23,6 @@ class CreateSubscriptionsTable extends Migration
                 $table->timestamp('current_period_start')->nullable(); // Start of the current billing period
                 $table->timestamp('current_period_end')->nullable(); // End of the current billing period
                 $table->timestamps();
-
                 $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
                 $table->foreign('plan_id')->references('id')->on('plans')->onDelete('cascade')->onUpdate('cascade');
         });

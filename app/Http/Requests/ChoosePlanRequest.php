@@ -25,7 +25,7 @@ class ChoosePlanRequest extends FormRequest
     {
         return [
             'selectedPlanid' =>'required|exists:plans,id',
-            'plan_type'      =>'required|in:month,year',
+            'plan_type'      =>'required|in:daily,weekly,month,year',
             'price_id'      =>'required',
 
 

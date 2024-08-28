@@ -55,7 +55,7 @@ class ManageSubsController extends Controller
              // Retrieve the subscription from Stripe
          $stripeSubscription = StripeSubscription::retrieve($subscription->subscription_id);
 
-             // Cancel the subscription immediately
+             // Cancel the subscription
              $stripeSubscription->cancel();
 
              // Retrieve the latest invoice to process a refund
@@ -66,7 +66,7 @@ class ManageSubsController extends Controller
              Log::info('Subscription ID: ' . $subscription->subscription_id);
 
              if ($invoice) {
-                //  try {
+                 try {
                      // Create a refund
                      Refund::create([
                          'charge' => $invoice->charge,
@@ -80,10 +80,10 @@ class ManageSubsController extends Controller
                     Log::info('Subscription canceled: ' . $subscription->subscription_id);
                      return redirect()->back()->with(['success'=> 'Subscription has been canceled and a refund has been processed.']);
 
-                //  } catch (\Exception $e) {
-                //     Log::info('Subscription ID: ' . $subscription->subscription_id);
-                //      return redirect()->back()->with(['error'=> 'Something went wrong please try agian later']);
-                //  }
+                 } catch (\Exception $e) {
+                    Log::info('Subscription ID: ' . $subscription->subscription_id);
+                     return redirect()->back()->with(['error'=> 'Something went wrong please try agian later']);
+                 }
              } else {
                 Log::info('Subscription ID: ' . $subscription->subscription_id);
                  return redirect()->back()->withErrors('No invoice found to process refund.');
@@ -99,15 +99,15 @@ class ManageSubsController extends Controller
      {
 
          try {
-             // Find the user
+
              $user = User::findOrFail($id);
 
-             // Find the subscription for the user
+
                 $subscription = User_Product::where('user_id', $user->id)
                  ->where('status', 'Subscribe')
                  ->firstOrFail();
 
-             // Check if the subscription ID is valid
+
              if (empty($subscription->subscription_id)) {
                  return redirect()->back()->withErrors('Invalid subscription ID.');
              }
@@ -115,15 +115,15 @@ class ManageSubsController extends Controller
              // Set Stripe secret key
              Stripe::setApiKey(config('services.stripe.sk'));
 
-             // Retrieve the subscription from Stripe
+
                 $stripeSubscription = StripeSubscription::retrieve($subscription->subscription_id);
 
-             // Check if the subscription is valid
+
              if (!$stripeSubscription || $stripeSubscription->status !== 'active') {
                  return redirect()->back()->withErrors('Subscription not found or already canceled.');
              }
 
-             // Cancel the subscription immediately
+
              $stripeSubscription->cancel();
 
              // Retrieve the latest invoice to process a refund
@@ -141,7 +141,7 @@ class ManageSubsController extends Controller
                      'amount' => $invoice->amount_due // Amount to refund in cents
                  ]);
 
-                 // Update the subscription status in the database
+
                  $subscription->status = 'canceled';
                  $subscription->save();
 

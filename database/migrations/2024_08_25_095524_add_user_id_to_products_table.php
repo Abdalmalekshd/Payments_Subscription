@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddStripeOneTimePriceIdToProductsTable extends Migration
+class AddUserIdToProductsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,11 +14,10 @@ class AddStripeOneTimePriceIdToProductsTable extends Migration
     public function up()
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->string('stripe_one_time_price_id')->after('image');
-            $table->string('stripe_weekly_price_id')->after('stripe_one_time_price_id');
-            $table->string('stripe_monthly_price_id')->after('stripe_weekly_price_id');
+            $table->integer('user_id')->unsigned()->after('id');
 
-            
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+
         });
     }
 
@@ -30,7 +29,8 @@ class AddStripeOneTimePriceIdToProductsTable extends Migration
     public function down()
     {
         Schema::table('products', function (Blueprint $table) {
-            //
+            $table->dropColumn('user_id');
+
         });
     }
 }

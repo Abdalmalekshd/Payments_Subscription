@@ -4,12 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Stripe\Price;
 
 class Plan extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'name', 'monthly_price_id', 'yearly_price_id', 'monthly_price', 'yearly_price', 'features'
+        'user_id',
+        'name',
+        'plan_description'
+
     ];
 
 
@@ -28,4 +32,16 @@ class Plan extends Model
         public function product(){
             return $this->hasMany(Product_Plan::class);
             }
+
+
+
+            public function price(){
+                    return $this->hasMany(PlanPrice::class);
+            }
+
+
+            public function User(){
+                return $this->hasOne(User::class);
+        }
+
 }
