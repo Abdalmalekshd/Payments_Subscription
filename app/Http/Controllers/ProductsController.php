@@ -45,7 +45,6 @@ class ProductsController extends Controller
 
     public function createproducts(ProductRequest $req) {
 
-
         try {
 
             DB::beginTransaction();
@@ -89,6 +88,8 @@ class ProductsController extends Controller
 
 
                 foreach ($req->composited_products as $index => $itemId) {
+
+
                     $quantity = $req->composited_quantities[$index];
                 ProductCompositeItem::create([
                     'product_composite_id' =>$product->id,
@@ -97,6 +98,9 @@ class ProductsController extends Controller
 
                 ]);
             }
+            }else{
+                $product->save();
+
             }
 
 
@@ -106,7 +110,6 @@ class ProductsController extends Controller
             return redirect()->back()->with(['success' => 'New Product Added']);
         } catch (\Exception $ex) {
             DB::rollBack();
-
 
             return redirect()->back()->with(['error' => 'Error while adding new product']);
         }

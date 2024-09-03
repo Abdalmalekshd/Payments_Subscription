@@ -143,9 +143,24 @@ class SubscriptionController extends Controller
 
    public function changestatus($id){
     $subscription=Subscription::where('user_id',Auth::user()->id)->find($id);
+
+
+
+
     if($subscription && $subscription->status == 'pending'){
+
+        $current_period_end = match ($subscription->plan_type) {
+            'day' => now()->addDay(),
+            'week' => now()->addWeek(),
+            'month' => now()->addMonth(),
+            default => now()->addYear(),
+        };
+
         $subscription->update([
             'status'    => 'active',
+            'current_period_start' =>now(),
+            'current_period_end' =>$current_period_end,
+
         ]);
     }else{
         // return response()->json(['error' => 'Subscription not found'], 404);

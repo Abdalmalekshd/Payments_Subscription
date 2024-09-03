@@ -54,7 +54,7 @@
       <!-- Checkbox to add related products -->
       <div class="form-group mb-4">
         <div class="form-check">
-          <input type="checkbox" class="form-check-input" id="isCompositeProduct" name='is_comopsite' required>
+          <input type="checkbox" class="form-check-input" id="isCompositeProduct" name='is_comopsite'>
           <label class="form-check-label" for="isCompositeProduct" >Add Products</label>
         </div>
       </div>
@@ -74,7 +74,7 @@
 
           <div class="form-group mb-3">
             <label for="relatedProductQuantity">Quantity</label>
-            <input type="number" class="form-control" name="composited_quantities[]" id="relatedProductQuantity" placeholder="Enter quantity for related product" required>
+            <input type="number" class="form-control" name="composited_quantities[]" id="relatedProductQuantity" placeholder="Enter quantity for related product">
           </div>
         </div>
 

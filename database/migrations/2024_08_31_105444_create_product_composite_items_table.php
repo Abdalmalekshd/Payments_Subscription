@@ -18,7 +18,6 @@ class CreateProductCompositeItemsTable extends Migration
             $table->integer('product_composite_id')->unsigned();
             $table->integer('item_id')->unsigned();
             $table->integer('qty');
-
             $table->foreign('product_composite_id')->references('id')->on('products')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('item_id')->references('id')->on('products')->onDelete('cascade')->onUpdate('cascade');
 
