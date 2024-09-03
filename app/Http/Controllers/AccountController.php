@@ -59,13 +59,7 @@ class AccountController extends Controller
 
     public function update_payments(){
 
-
-
-
             return view('User.Update_Payments');
-
-
-
 
     }
 

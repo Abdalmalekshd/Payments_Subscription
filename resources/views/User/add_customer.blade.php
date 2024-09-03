@@ -12,7 +12,7 @@
 
       <div class="form-group mb-3">
         <label for="productName">Customer Name</label>
-        <input type="text" class="form-control" name="name" id="customerName" placeholder="Enter customer name" required >
+        <input type="text" class="form-control" name="name" id="customerName" placeholder="Enter customer name"  required>
 
         @error('name')
         <div class="text-danger">{{ $message }}</div>
@@ -36,40 +36,35 @@
         @enderror
     </div>
 
+
+
+
       <div class="form-group mb-3">
-        <label for="productPrice">Thumb</label>
-        <input type="text" class="form-control" name="thumb" id="thumb" placeholder="Enter thumb" required>
-        @error('thumb')
+        <label for="address">Address</label>
+        <textarea class="form-control" id="address" name="address" rows="3" placeholder="Enter customer address" required ></textarea>
+        @error('address')
         <div class="text-danger">{{ $message }}</div>
         @enderror
     </div>
 
 
-      <div class="form-group mb-3">
-        <label for="address">Address</label>
-        <textarea class="form-control" id="address" name="address" rows="3" placeholder="Enter customer address" required></textarea>
-      </div>
-
-
 
     <div class="row mb-3 item-row">
         <div class="col-md-12">
-            <select id="price_id" name="price_id" class="selectpicker form-control" >
-              <optgroup label="Please choose plan">
+            <select id="country_id" name="country_id" class="selectpicker form-control" required >
+              <optgroup label="Please choose customer country">
               <option value=""></option>
-
-                @foreach ($plans as $plan)
-                @foreach ($plan->price as $price)
-
-              <option value="{{ $price->id }}">
-                {{ $plan->name }} - {{ $price->plan_type }}
+                @foreach ($country as $country)
+              <option value="{{ $country->id }}">
+                {{ $country->name }}
               </option>
-              @endforeach
               @endforeach
               </optgroup>
             </select>
           </div>
-
+          @error('country_id')
+          <div class="text-danger">{{ $message }}</div>
+          @enderror
     </div>
 
       <div class="d-flex justify-content-end">

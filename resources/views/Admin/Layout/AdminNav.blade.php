@@ -12,10 +12,7 @@
                 <a class="nav-link" href="{{ route('manage.subs') }}">Manage Users</a>
             </li>
 
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('manage.products.subs') }}">MANAGE PRODUCTS SUBSCRIPTIONS</a>
 
-            </li>
 
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('manage.users') }}">Manage SUBSCRIPTIONS</a>
@@ -23,6 +20,10 @@
 
             </li>
 
+
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('manage.plans') }}">MANAGE PLANS</a>
+            </li>
 
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('admin.settings') }}">Settings</a>

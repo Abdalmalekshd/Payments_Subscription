@@ -9,8 +9,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PlansController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\SubscriptionController;
 
-    Route::group(['namespace'=>'App\Http\Controllers','middleware'=>'guest:web'],function(){
+
+
+
+    Route::group(['namespace'=>'App\Http\Controllers'],function(){
 
     //Start SignUp Routes
 
@@ -29,8 +33,6 @@ use App\Http\Controllers\PurchaseController;
     //End Login Routes
 
 
-
-
     });
     //Start Shopify Routes
 
@@ -47,7 +49,6 @@ use App\Http\Controllers\PurchaseController;
         //Start Products And Purchases Routes
 
 
-
         Route::get('products',[ProductsController::class,'products'])->name('home');
 
         Route::get('addproducts',[ProductsController::class,'AddProductsForm'])->name('Add.products');
@@ -56,7 +57,6 @@ use App\Http\Controllers\PurchaseController;
 
 
 
-    Route::get('manage_proddutcs_subs',[ProductsController::class,'manageProductssubs'])->name('product.subscription');
 
 
     //Start Subscribe Purchase  Routes
@@ -108,26 +108,31 @@ use App\Http\Controllers\PurchaseController;
     //End cancel sub Routes
 
 
-    //Start Stripe Payment Routes
-
-    Route::post('/checkout', [PaymentController::class,'checkout'])->name('process.payment');
-
-    Route::get('success_url',  [PaymentController::class,'success'])->name('success');
-
-    Route::get('cancel_url',[PaymentController::class,'cancel'])->name('cancel');
-
-    //End Stripe Payment Routes
 
 
-    //Start Cancel && Pause && Resume subscription Routes
+    //Start  subscription Routes
 
-    Route::post('cancel_subscription',[PaymentController::class,'cancel_subscription'])->name('cancel.subscription');
+    Route::get('add_subs',[SubscriptionController::class,'AddSubscriptionForm'])->name('add.subscription.form');
 
-    Route::post('/subscription/pause', [PaymentController::class, 'pause'])->name('subscription.pause');
-    Route::post('/subscription/resume', [PaymentController::class, 'resume'])->name('subscription.resume');
+    Route::get('/get-plan-details/{id}', [SubscriptionController::class,'getPlanDetails'])->name('plan.details');
+
+    Route::post('create_subs',[SubscriptionController::class,'create_subs'])->name('Create.subscription');
 
 
-    //End Cancel && Pause && Resume subscription Routes
+    Route::get('/My_Subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+
+    Route::get('/change_sub_status/{id}', [SubscriptionController::class, 'changestatus'])->name('change.subscription.status');
+
+
+
+    // Route::post('cancel_subscription',[PaymentController::class,'cancel_subscription'])->name('cancel.subscription');
+
+    // Route::post('/subscription/pause', [PaymentController::class, 'pause'])->name('subscription.pause');
+    // Route::post('/subscription/resume', [PaymentController::class, 'resume'])->name('subscription.resume');
+
+// الراوتات المعلقة هي راوتات الاشتراك تبع اليوزر (ممكن تتلغى)
+
+    //End  subscription Routes
 
 
     //Start Plans Route
@@ -142,8 +147,6 @@ use App\Http\Controllers\PurchaseController;
 
     Route::post('update_plan',[PlansController::class,'updatePlan'])->name('update.plan');
 
-
-
     Route::get('dlt_plan/{id}',[PlansController::class,'deletePlan'])->name('delete.plan');
 
 
@@ -153,12 +156,11 @@ use App\Http\Controllers\PurchaseController;
 
         //Start Customer Route
 
-
-
         Route::get('add_customer',[CustomerController::class,'AddCustomerForm'])->name('add.customer.form');
 
         Route::post('create_customer',[CustomerController::class,'create_customer'])->name('Create.customer');
 
-        //End Plans Route
+        //End Customer Route
+
 
     });

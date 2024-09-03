@@ -36,6 +36,31 @@ namespace App\Models{
 
 namespace App\Models{
 /**
+ * App\Models\Country
+ *
+ * @property int $id
+ * @property string $name
+ * @property string $currency_name
+ * @property string $currency_code
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Customer> $customer
+ * @property-read int|null $customer_count
+ * @method static \Illuminate\Database\Eloquent\Builder|Country newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Country newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Country query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Country whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Country whereCurrencyCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Country whereCurrencyName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Country whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Country whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Country whereUpdatedAt($value)
+ */
+	class Country extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
  * App\Models\Customer
  *
  * @property int $id
@@ -45,10 +70,12 @@ namespace App\Models{
  * @property string $email
  * @property string $phone
  * @property string $address
- * @property int|null $country
+ * @property \App\Models\Country|null $country
  * @property string|null $currency
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $stripe_id
+ * @property-read \App\Models\Subscription|null $subscriptions
  * @property-read \App\Models\User|null $users
  * @method static \Illuminate\Database\Eloquent\Builder|Customer newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Customer newQuery()
@@ -62,6 +89,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Customer whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Customer whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Customer wherePhone($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Customer whereStripeId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Customer whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Customer whereUserId($value)
  */
@@ -78,7 +106,8 @@ namespace App\Models{
  * @property string|null $plan_description
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\User|null $User
+ * @property string|null $photo
+ * @property-read \App\Models\User $User
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\PlanPrice> $price
  * @property-read int|null $price_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product_Plan> $product
@@ -91,6 +120,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Plan whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Plan whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Plan whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Plan wherePhoto($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Plan wherePlanDescription($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Plan whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Plan whereUserId($value)
@@ -142,12 +172,15 @@ namespace App\Models{
  * @property string|null $stripe_price_id
  * @property string $image
  * @property int $quantity
+ * @property int $is_composite_product (0 => Not Composite),(1 => Is Composite)
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Product> $compositeprodcut
+ * @property-read int|null $compositeprodcut_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product_Plan> $plan
  * @property-read int|null $plan_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User_Product> $product_UserProduct
- * @property-read int|null $product__user_product_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Product> $products
+ * @property-read int|null $products_count
  * @method static \Illuminate\Database\Eloquent\Builder|Product newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Product newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Product query()
@@ -155,6 +188,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Product whereDescription($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Product whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Product whereImage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Product whereIsCompositeProduct($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Product whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Product wherePrice($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Product whereQuantity($value)
@@ -163,6 +197,31 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Product whereUserId($value)
  */
 	class Product extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\ProductCompositeItem
+ *
+ * @property int $id
+ * @property int $product_composite_id
+ * @property int $item_id
+ * @property int $qty
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Product $childprodcuts
+ * @property-read \App\Models\Product $parentprodcut
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductCompositeItem newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductCompositeItem newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductCompositeItem query()
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductCompositeItem whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductCompositeItem whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductCompositeItem whereItemId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductCompositeItem whereProductCompositeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductCompositeItem whereQty($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductCompositeItem whereUpdatedAt($value)
+ */
+	class ProductCompositeItem extends \Eloquent {}
 }
 
 namespace App\Models{
@@ -176,7 +235,7 @@ namespace App\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Plan|null $plansproducts
- * @property-read \App\Models\Product|null $productsplans
+ * @property-read \App\Models\Product $product
  * @method static \Illuminate\Database\Eloquent\Builder|Product_Plan newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Product_Plan newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Product_Plan query()
@@ -206,13 +265,18 @@ namespace App\Models{
  * @property string|null $current_period_end
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property int $price
  * @property-read \App\Models\Plan $Plan
  * @property-read \App\Models\User $User
+ * @property-read \App\Models\Customer|null $customer
  * @property-read mixed $current_period_end_formatted
+ * @property-read mixed $current_period_start_formatted
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription active()
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription notActive()
+ * @method static \Illuminate\Database\Eloquent\Builder|Subscription paused()
+ * @method static \Illuminate\Database\Eloquent\Builder|Subscription pending()
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription query()
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription whereCurrentPeriodEnd($value)
@@ -221,6 +285,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription wherePlanId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription wherePlanType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Subscription wherePrice($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription whereStripePriceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription whereSubscriptionId($value)

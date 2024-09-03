@@ -7,6 +7,7 @@ use App\Models\User_Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
+use App\Models\ProductCompositeItem;
 use App\Traits\UplaodImageTraits;
 use Auth;
 use Illuminate\Support\Facades\DB;
@@ -23,30 +24,28 @@ class ProductsController extends Controller
 
     public function products(){
 
-        $product=Product::paginate(20);
+        $product=Product::where('user_id',Auth::user()->id)->paginate(20);
 
         return view('User.Products',['products' => $product]);
     }
 
 
 
-    public function manageProductssubs(){
-
-        $data=[];
-        $data['User_products']=User_Product::get();
-
-
-        return view('User.ManageSubs',$data);
-     }
-
-
 
 
      public function AddProductsForm(){
-        return view('User.add_products');
+
+         $allProducts=Product::where(function($query){
+            $query->where('is_composite_product','=',0)->
+           where('user_id',Auth::user()->id);
+         }
+         )->get();
+        return view('User.add_products',compact('allProducts'));
     }
 
     public function createproducts(ProductRequest $req) {
+
+
         try {
 
             DB::beginTransaction();
@@ -63,6 +62,8 @@ class ProductsController extends Controller
                 ],
             ]);
 
+            // $IsComposite=$req->is_comopsite == 'on' ? 1 : 0;
+
             $product = new Product([
                 'user_id' => Auth::user()->id,
                 'name' => $req->name,
@@ -70,17 +71,42 @@ class ProductsController extends Controller
                 'price' => $req->price,
                 'stripe_price_id' => $price->id,
                 'description' => $req->description,
-                'quantity'    => $req->quantity
+                'quantity'    => $req->quantity,
+
             ]);
 
-            $product->save();
+
+
+
+
+
+            if($req->is_comopsite == 'on'){
+
+
+                $product->is_composite_product = 1;
+
+                $product->save();
+
+
+                foreach ($req->composited_products as $index => $itemId) {
+                    $quantity = $req->composited_quantities[$index];
+                ProductCompositeItem::create([
+                    'product_composite_id' =>$product->id,
+                    'item_id'              =>$itemId,
+                    'qty'                  =>$quantity
+
+                ]);
+            }
+            }
+
+
 
             DB::commit();
 
             return redirect()->back()->with(['success' => 'New Product Added']);
         } catch (\Exception $ex) {
-            return $ex;
             DB::rollBack();
+
 
             return redirect()->back()->with(['error' => 'Error while adding new product']);
         }
@@ -138,7 +164,7 @@ class ProductsController extends Controller
     public function DeleteProduct($id)
     {
         try {
-            $product = Product::find($id);
+            $product = Product::where('user_id',Auth::user()->id)->find($id);
             if ($product) {
 
                 Stripe::setApiKey(config('services.stripe.sk'));
@@ -158,10 +184,12 @@ class ProductsController extends Controller
 
                 return redirect()->back()->with(['success' => 'Product deleted successfully']);
             } else {
-                return redirect()->back()->with(['error' => 'Product not found']);
+                abort(404,'Not Found');
+
             }
         } catch (\Exception $ex) {
-            return redirect()->back()->with(['error' => 'Error while deleting product: ' . $ex->getMessage()]);
+                   abort(404,'Not Found');
+
         }
     }
 

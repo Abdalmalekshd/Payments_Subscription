@@ -21,7 +21,8 @@
                         <a class="nav-link" href="{{ route('account') }}">ACCOUNT</a>
                         <a class="nav-link" href="{{ route('subscriptions') }}">SUBSCRIPTIONS</a>
                         <a class="nav-link" href="{{ route('update_payments') }}">UPDATE PAYMENT</a>
-                        <a class="nav-link" href="{{ route('product.subscription') }}">Products Subscriptions</a>
+                        <a class="nav-link" href="{{ route('Manage.Plans') }}">MANAGE MY PLANS</a>
+
 
 
                         <a class="nav-link" href="{{ route('receipts') }}">RECEIPTS</a>
@@ -42,14 +43,14 @@
                         <button onclick="event.preventDefault(); document.getElementById('resume-form').submit();" class="btn btn-custom">
                             Resume Subscription
                         </button>
-                        <form id="resume-form" action="{{ route('subscription.resume') }}" method="POST" style="display: none;">
+                        {{--  <form id="resume-form" action="{{ route('subscription.resume') }}" method="POST" style="display: none;">  --}}
                             @csrf
                         </form>
                     @else
                         <button onclick="event.preventDefault(); document.getElementById('pause-form').submit();" class="btn btn-custom">
                             Pause Subscription
                         </button>
-                        <form id="pause-form" action="{{ route('subscription.pause') }}" method="POST" style="display: none;">
+                        {{--  <form id="pause-form" action="{{ route('subscription.pause') }}" method="POST" style="display: none;">  --}}
                             @csrf
                         </form>
                     @endif
@@ -75,13 +76,13 @@
 
 
 
-
+{{--
                         <form method="POST" action="{{ route('cancel.subscription') }}">
                             @csrf
                     <div class="text-center">
                         <input type="submit" value="Cancel Subscription" class="btn btn-custom">
                     </div>
-                </form>
+                </form>  --}}
 
                 </div>
             </div>

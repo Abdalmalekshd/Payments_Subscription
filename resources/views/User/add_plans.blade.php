@@ -14,13 +14,30 @@
       <div class="form-group mb-3">
         <label for="planName">Plan Name</label>
         <input type="text" class="form-control" name="name" id="planName" placeholder="Enter plan name" required>
+
+        @error('name')
+        <div class="text-danger">{{ $message }}</div>
+        @enderror
       </div>
 
       <!-- Plan Description -->
       <div class="form-group mb-3">
         <label for="planDescription">Plan Description</label>
         <textarea class="form-control" id="planDescription" name="description" rows="3" placeholder="Enter plan description"></textarea>
+        @error('description')
+        <div class="text-danger">{{ $message }}</div>
+        @enderror
+    </div>
+
+      <!-- Plan Photo -->
+      <div class="form-group mb-3">
+        <label for="planphoto">Plan Photo</label>
+        <input type="file" name="photo" id="photo" required accept="image/*">
+        @error('photo')
+        <div class="text-danger">{{ $message }}</div>
+        @enderror
       </div>
+
 
       <!-- Pricing Fields -->
       <div class="row">
@@ -29,7 +46,7 @@
         <div class="col-md-2">
           <div class="form-group mb-3">
             <label for="price_type">Plan Type</label>
-            <select name="price_type[]" id="price_type" class="form-control price-select" onchange="handlePlanTypeChange(this)">
+            <select name="price_type[]" id="price_type" class="form-control price-select" onchange="handlePlanTypeChange(this)" required>
               <optgroup label="Please choose Plan type">
                 <option value=""></option>
                 <option value="day">Daily</option>
@@ -39,6 +56,9 @@
               </optgroup>
             </select>
           </div>
+          @error('price_type')
+          <div class="text-danger">{{ $message }}</div>
+          @enderror
         </div>
 
         <div class="col-md-2">
@@ -46,21 +66,30 @@
             <label for="dailyPrice">Price</label>
             <input type="number" class="form-control" name="price[]" id="Price" placeholder="Enter price" required>
           </div>
+          @error('price[]')
+          <div class="text-danger">{{ $message }}</div>
+          @enderror
         </div>
 
         <!-- Discount Section -->
         <div class="col-md-2">
           <div class="form-group mb-3">
             <label for="discount">Discount</label>
-            <input type="number" class="form-control" name="discount[]" id="discount" placeholder="Enter discount">
+            <input type="number" class="form-control" name="discount[]" id="discount" placeholder="Enter discount" >
           </div>
+          @error('discount')
+          <div class="text-danger">{{ $message }}</div>
+          @enderror
         </div>
 
         <div class="col-md-2">
           <div class="form-group mb-3">
             <label for="discountduration">Discount Limit</label>
-            <input type="date" class="form-control" name="discount_limit[]" id="discountduration" placeholder="Enter discount duration">
+            <input type="date" class="form-control" name="discount_limit[]" id="discountduration" placeholder="Enter discount duration" >
           </div>
+          @error('discount_limit')
+          <div class="text-danger">{{ $message }}</div>
+          @enderror
         </div>
 
         <div class="col-md-2">
@@ -75,6 +104,9 @@
             </select>
           </div>
         </div>
+        @error('discount_type')
+        <div class="text-danger">{{ $message }}</div>
+        @enderror
       </div>
 
       <!-- Section to Add Additional Prices -->
@@ -98,23 +130,27 @@
           <div class="row mb-3 item-row">
 
             <div class="col-md-4">
-              <select id="product_search_0" name="items[0][id]" class="selectpicker form-control product-select" data-live-search="true">
+              <select id="product_search" name="product_id" class="selectpicker form-control product-select" required data-live-search="true">
                 <optgroup label="Please choose products to add to your plan">
-                <option value=""></option>
+
                   @foreach ($products as $product)
                     <option value="{{ $product->id }}">{{ $product->name }}</option>
                   @endforeach
                 </optgroup>
               </select>
+              @error('product_id')
+              <div class="text-danger">{{ $message }}</div>
+              @enderror
             </div>
 
             <div class="col-md-4">
-              <input type="number" class="form-control" name="items[0][quantity]" placeholder="Enter Quantity" required>
+              <input type="number" class="form-control" name="quantity" placeholder="Enter Quantity" required>
+              @error('quantity')
+              <div class="text-danger">{{ $message }}</div>
+              @enderror
             </div>
 
-            <div class="col-md-1">
-              <button type="button" class="btn btn-success add-item">+</button>
-            </div>
+
           </div>
         </div>
       </div>
@@ -157,68 +193,6 @@
             $(selectElement).trigger('change'); // Refresh the select picker
         }
 
-        // Function to update product options
-        function updateProductOptions() {
-            let selectedProducts = [];
-
-            $('.product-select').each(function() {
-                let selectedValue = $(this).val();
-                if (selectedValue) {
-                    selectedProducts.push(selectedValue);
-                }
-            });
-
-            $('.product-select').each(function() {
-                let select = $(this);
-                select.find('option').each(function() {
-                    let option = $(this);
-                    if (selectedProducts.includes(option.val()) && option.val() !== select.val()) {
-                        option.hide(); // Hide the selected option
-                    } else {
-                        option.show(); // Show all other options
-                    }
-                });
-                select.selectpicker('refresh');
-            });
-        }
-
-        // Add new item row
-        $(document).on('click', '.add-item', function() {
-            let newItemRow = `
-             <div class="row mb-3 item-row">
-            <div class="col-md-4">
-                <select id="product_search_${itemIndex}" name="items[${itemIndex}][id]" class="selectpicker form-control product-select" data-live-search="true">
-                    <optgroup label="Please choose products to add to your plan">
-                        @foreach ($products as $product)
-                            <option value="{{ $product->id }}">{{ $product->name }}</option>
-                        @endforeach
-                    </optgroup>
-                </select>
-            </div>
-            <div class="col-md-4">
-                <input type="number" class="form-control" name="items[${itemIndex}][quantity]" placeholder="Enter Quantity" required>
-            </div>
-            <div class="col-md-1">
-                <button type="button" class="btn btn-danger remove-item">-</button>
-            </div>
-        </div>
-            `;
-            $('#itemContainer').append(newItemRow);
-            $(`#product_search_${itemIndex}`).selectpicker('refresh');
-            updateProductOptions();
-            itemIndex++;
-        });
-
-        // Update product options on change
-        $(document).on('change', '.product-select', function() {
-            updateProductOptions();
-        });
-
-        // Remove item row
-        $(document).on('click', '.remove-item', function() {
-            $(this).closest('.item-row').remove();
-            updateProductOptions();
-        });
 
         // Add new price row
         $('#addPriceButton').click(function() {
@@ -237,7 +211,7 @@
                                                         <div class="col-md-2">
                         <div class="form-group mb-3">
                             <label for="price_${priceIndex}">Price</label>
-                            <input type="number" class="form-control" name="price[]" id="price_${priceIndex}" placeholder="Enter price" required>
+                            <input type="number" class="form-control" name="price[]" id="price_${priceIndex}" placeholder="Enter price" >
                         </div>
                     </div>
 

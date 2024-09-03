@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PlanRequest;
 use App\Models\Plan;
 use App\Models\PlanPrice;
 use App\Models\Product;
 use App\Models\Product_Plan;
 use Auth;
 use Illuminate\Http\Request;
+use App\Traits\UplaodImageTraits;
+use File;
 use Illuminate\Support\Facades\DB;
 use Stripe\Plan as StripePlan;
+
 class PlansController extends Controller
 {
+    use UplaodImageTraits;
 
     public function ShowPlans(){
         $plans = Plan::where('user_id',Auth::user()->id)->get();
@@ -22,13 +27,19 @@ class PlansController extends Controller
 
 
     public function AddPlansForm(){
-        $products = Product::where('user_id',Auth::user()->id)->get();
-        return view('User.add_plans', compact('products'));
+
+        $products = Product::where(function($query){
+            $query->where('is_composite_product','=',1)->
+           where('user_id',Auth::user()->id);
+         }
+         )->get();
+
+         return view('User.add_plans', compact('products'));
     }
 
 
 
-    public function create_plan(Request $req) {
+    public function create_plan(PlanRequest $req) {
 
         try {
 
@@ -36,10 +47,15 @@ class PlansController extends Controller
 
             \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
 
+
+            $photo = $this->UploadImage('plans', $req->photo);
+
+
             $plan = Plan::create([
                 'name' => $req->name,
                 'user_id' => Auth::user()->id,
                 'description' => $req->description,
+                'photo'       =>$photo
             ]);
 
             foreach ($req->price_type as $index => $type) {
@@ -70,16 +86,16 @@ class PlansController extends Controller
                 ]);
             }
 
-            foreach ($req->items as $product) {
+
 
             Product_Plan::create([
                 'plan_id'       =>  $plan->id,
-                'product_id'    =>  $product['id'],
-                'quantity'   =>  $product['quantity'],
+                'product_id'    =>  $req->product_id,
+                'quantity'   =>  $req->quantity,
 
 
             ]);
-        }
+
 
 
             DB::commit();
@@ -89,7 +105,7 @@ class PlansController extends Controller
 
 
             DB::rollBack();
-
+            return $ex;
             return redirect()->back()->with(['error' => 'Error while adding new plan']);
         }
     }
@@ -129,7 +145,22 @@ class PlansController extends Controller
             $plan->update([
                 'name' => $req->name,
                 'description' => $req->description,
+
+
             ]);
+
+
+            if ($req->hasFile('photo')) {
+                $des = 'storage/plans/' . $plan->photo;
+
+                if (File::exists($des)) {
+                    File::delete($des);
+                }
+
+                $photo = $this->UploadImage('plans', $req->photo);
+                $plan->photo = $photo;
+                $plan->save();
+            }
 
 
             PlanPrice::where('plan_id', $plan->id)->delete();
@@ -167,13 +198,13 @@ class PlansController extends Controller
 
             Product_Plan::where('plan_id', $plan->id)->delete();
 
-            foreach ($req->items as $product) {
                 Product_Plan::create([
                     'plan_id' => $plan->id,
-                    'product_id' => $product['id'],
-                    'quantity' => $product['quantity'],
+                    'product_id' => $req->product_id,
+                    'quantity' => $req->quantity,
                 ]);
-            }
+
+
 
 
             DB::commit();
@@ -182,6 +213,9 @@ class PlansController extends Controller
         } catch (\Exception $ex) {
 
             DB::rollBack();
+
+            return $ex;
+
             return redirect()->back()->with(['error' => 'Error while updating plan']);
 }
 }
@@ -192,16 +226,29 @@ public function deletePlan($id) {
 
         DB::beginTransaction();
 
+        \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+
         $plan = Plan::where('user_id', Auth::user()->id)->find($id);
 
         if (!$plan) {
             return redirect()->route('User.ShowPlan')->with('error', 'Plan not found');
         }
 
+        foreach($plan->price as $price){
+        $stripeplan=StripePlan::retrieve($price->stripe_price_id);
+        $stripeplan->delete();
+
+        }
+
+
+        $des = 'storage/plans/' . $plan->photo;
+        if (File::exists($des)) {
+            File::delete($des);
+        }
+
         $plan->delete();
 
 
-        // \Stripe\Plan::retrieve($plan->stripe_price_id)->delete();
 
         DB::commit();
 

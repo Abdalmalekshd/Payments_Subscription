@@ -106,7 +106,7 @@
             @foreach ($plan->product as $index => $item)
               <div class="row mb-3 item-row">
                 <div class="col-md-4">
-                  <select id="product_search_{{ $index }}" name="items[{{ $index }}][id]" class="selectpicker form-control product-select" data-live-search="true">
+                  <select id="product_search" name="product_id" class="selectpicker form-control product-select" data-live-search="true">
                     @foreach ($products as $product)
                       <option value="{{ $product->id }}" {{ $item->product_id == $product->id ? 'selected' : '' }}>{{ $product->name }}</option>
                     @endforeach
@@ -114,18 +114,30 @@
                 </div>
 
                 <div class="col-md-4">
-                  <input type="number" class="form-control" name="items[{{ $index }}][quantity]" value="{{ $item->quantity }}" required>
+                  <input type="number" class="form-control" name="quantity" value="{{ $item->quantity }}" required>
                 </div>
 
-                <div class="col-md-1">
-                  <button type="button" class="btn btn-danger remove-item">-</button>
-                </div>
+
               </div>
             @endforeach
           @else
             <p>No items added to this plan.</p>
           @endif
         </div>
+
+
+        <!-- Plan Photo -->
+        <div class="form-group mb-3">
+          <label for="planphoto">Plan Photo</label>
+          <input type="file" name="photo" id="photo">
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-6">
+        <img src="{{ url('storage/plans/'.$plan->photo) }}" alt="{{ $plan->name }}" style="width:100%;">
+    </div>
+    </div>
+
       </div>
 
       <!-- Submit Button -->
@@ -138,59 +150,13 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
     $(document).ready(function() {
-        let itemIndex = {{ $plan->product ? $plan->product->count() : 0 }};
+
         let priceIndex = {{ $plan->price ? $plan->price->count() : 0 }};
 
         // Initialize Select2 and Selectpicker
         $('.select2').select2();
         $('.selectpicker').selectpicker();
 
-        // Function to update product options
-        function updateProductOptions() {
-            let selectedProducts = [];
-            $('.product-select').each(function() {
-                let selectedValue = $(this).val();
-                if (selectedValue) {
-                    selectedProducts.push(selectedValue);
-                }
-            });
-
-            $('.product-select').each(function() {
-                let select = $(this);
-                select.find('option').each(function() {
-                    let option = $(this);
-                    if (selectedProducts.includes(option.val()) && option.val() !== select.val()) {
-                        option.hide(); // Hide the selected option
-                    } else {
-                        option.show(); // Show all other options
-                    }
-                });
-                select.selectpicker('refresh');
-            });
-        }
-
-        // Add new item row
-        $(document).on('click', '.add-item', function() {
-            let newItemRow = `
-                <div class="row mb-3 item-row">
-                    <div class="col-md-4">
-                        <select id="product_search_${itemIndex}" name="items[${itemIndex}][id]" class="selectpicker form-control product-select" data-live-search="true">
-                            @foreach ($products as $product)
-                                <option value="{{ $product->id }}">{{ $product->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <input type="number" class="form-control" name="items[${itemIndex}][quantity]" required>
-                    </div>
-                    <div class="col-md-1">
-                        <button type="button" class="btn btn-danger remove-item">-</button>
-                    </div>
-                </div>
-            `;
-            $('#itemContainer').append(newItemRow);
-            itemIndex++;
-        });
 
         // Add new price row
         $('#addPriceButton').click(function() {
@@ -247,11 +213,7 @@
             priceIndex = Math.max(1, priceIndex - 1); // Avoid having zero price rows
         });
 
-        // Remove item row
-        $(document).on('click', '.remove-item', function() {
-            $(this).closest('.item-row').remove();
-            updateProductOptions();
-        });
+
     });
   </script>
 @endsection

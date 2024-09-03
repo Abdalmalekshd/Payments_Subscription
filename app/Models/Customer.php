@@ -21,12 +21,24 @@ class Customer extends Model
         'address',
         'country',
         'currency',
+        'stripe_id'
     ];
 
 
 
     public function users(){
-        return $this->hasOne(User::class);
+        return $this->belongsTo(User::class);
         }
 
+
+        public function subscriptions()
+        {
+            return $this->hasOne(Subscription::class);
+        }
+
+    public function country(){
+
+        return $this->belongsTo(Country::class);
+
+    }
 }

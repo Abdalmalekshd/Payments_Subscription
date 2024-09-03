@@ -25,7 +25,7 @@ class ChargeSubscriptions extends Command
     {
         Log::info('Charging subscriptions...');
 
-        // Retrieve all active subscriptions that are due for renewal
+    
         $subscriptions = Subscription::where('status', 'active')
             ->where('current_period_end', '<=', now())
             ->get();

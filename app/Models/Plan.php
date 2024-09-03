@@ -12,7 +12,8 @@ class Plan extends Model
     protected $fillable = [
         'user_id',
         'name',
-        'plan_description'
+        'plan_description',
+        'photo',
 
     ];
 
@@ -41,7 +42,7 @@ class Plan extends Model
 
 
             public function User(){
-                return $this->hasOne(User::class);
+                return $this->belongsTo(User::class);
         }
 
 }

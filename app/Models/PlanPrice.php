@@ -10,16 +10,17 @@ class PlanPrice extends Model
     use HasFactory;
     protected $fillable=[
         'stripe_price_id',
-       'price',
+        'price',
         'plan_type',
         'plan_id',
         'discount',
-      'discount_limit',
-       'discount_type'
+        'discount_limit',
+        'discount_type'
     ];
 
 
     public function plan(){
         return $this->belongsTo(Plan::class);
     }
+
 }

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePlansTable extends Migration
+class AddStripeIdToCustomersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,8 @@ class CreatePlansTable extends Migration
      */
     public function up()
     {
-        Schema::create('plans', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name');
-
-            $table->text('plan_description')->nullable();
-            $table->timestamps();
+        Schema::table('customers', function (Blueprint $table) {
+            $table->string('stripe_id')->nullable()->index();
         });
     }
 
@@ -29,6 +25,8 @@ class CreatePlansTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('plans');
+        Schema::table('customers', function (Blueprint $table) {
+            $table->dropColumn('stripe_id');
+        });
     }
 }

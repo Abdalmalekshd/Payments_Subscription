@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CustomerRequest;
+use App\Models\Country;
 use App\Models\Customer;
 use App\Models\Plan;
 use App\Models\PlanPrice;
@@ -13,44 +15,40 @@ use Illuminate\Http\Request;
 class CustomerController extends Controller
 {
     public function AddCustomerForm(){
-        $plans=Plan::where('user_id',Auth::user()->id)->with('price')->get();
-        return view('User.add_customer',compact('plans'));
+        $country=Country::get();
+        return view('User.add_customer',compact('country'));
     }
 
 
-    public function create_customer(Request $req){
+    public function create_customer(CustomerRequest $req){
 
-        try{
-        DB::beginTransaction();
+
+        $country=Country::find($req->country_id);
+
+
 
         $customer=Customer::create([
-                'user_id' =>Auth::user()->id,
-                'name' =>$req->name,
-                'email' =>$req->email,
-                'phone' =>$req->phone,
-                'address' =>$req->address,
+                'user_id'   =>Auth::user()->id,
+                'name'      =>$req->name,
+                'email'     =>$req->email,
+                'phone'     =>$req->phone,
+                'address'   =>$req->address,
+                'country'   =>$country->id,
+                'currency'  =>$country->currency_code
         ]);
 
-        $planPrice = PlanPrice::with('plan')->findOrFail($req->price_id);
-        Subscription::create([
-            'user_id'    =>Auth::user()->id,
-            'customer_id'=>$customer->id,
-            'status'     =>'pending',
-            'plan_id' => $planPrice->plan->id,
-            'plan_type' => $planPrice->plan_type,
-        ]);
 
-        DB::Commit();
 
-        return redirect()->back()->with(['success' => 'New Customer Added']);
-    } catch (\Exception $ex) {
+        if($customer){
 
-        DB::rollBack();
-        return $ex;
-
-        return redirect()->back()->with(['error' => 'Error while adding new plan']);
+        return redirect()->back()->with(['success' => 'New customer added']);
+    }else{
+        return redirect()->back()->with(['error' => 'Some thing went wrong try again later!']);
 
     }
+
+
+
 }
 
 

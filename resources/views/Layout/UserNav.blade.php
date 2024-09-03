@@ -18,7 +18,7 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('manage.products.subs') }}">MANAGE PRODUCTS SUBSCRIPTIONS</a>
+                <a class="nav-link" href="{{ route('Manage.Plans') }}">MANAGE MY PLANS</a>
             </li>
 
             <li class="nav-item">

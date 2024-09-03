@@ -13,6 +13,11 @@ class Subscription extends Model
     public $guarded=[];
 
 
+    public function getCurrentPeriodStartFormattedAttribute()
+    {
+       return Carbon::parse($this->current_period_start)->format( 'd  M Y');
+    }
+
     public function getCurrentPeriodEndFormattedAttribute()
     {
        return Carbon::parse($this->current_period_end)->format( 'd  M Y');
@@ -30,6 +35,18 @@ class Subscription extends Model
     }
 
 
+    public function scopePending($q)
+    {
+        return $q->where('status','=','pending');
+    }
+
+
+    public function scopePaused($q)
+    {
+        return $q->where('status','=','paused');
+    }
+
+
     public function Plan(){
         return $this->belongsTo(Plan::class);
         }
@@ -40,5 +57,10 @@ class Subscription extends Model
         return $this->belongsTo(User::class);
         }
 
+
+        public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
 
 }

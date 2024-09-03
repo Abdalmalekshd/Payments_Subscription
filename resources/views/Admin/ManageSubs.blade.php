@@ -14,8 +14,7 @@
                     <nav class="nav flex-column">
                         <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
                         <a class="nav-link" href="{{ route('manage.subs') }}">MANAGE SUBSCRIPTIONS</a>
-                        <a class="nav-link" href="{{ route('manage.products.subs') }}">MANAGE PRODUCTS SUBSCRIPTIONS</a>
-
+                        <a class="nav-link" href="{{ route('manage.plans') }}">MANAGE PLANS</a>
                         <a class="nav-link" href="{{ route('manage.users') }}">MANAGE USERS</a>
                         <a class="nav-link" href="{{ route('admin.settings') }}">Settings</a>
 
@@ -36,6 +35,8 @@
                                 <th>Subscription_plan</th>
                                 <th>Subscription_plan_type</th>
                                 <th>Status</th>
+                                <th>price</th>
+                                <th>description</th>
                                 <th>Subscription_start_date</th>
                                 <th>Subscription_end_date</th>
                                 <th></th>
@@ -46,16 +47,20 @@
                             @if(count($Subs) > 0)
                             @foreach ($Subs as $Sub)
                             <tr>
-                                <td>{{ $Sub->User->name }}</td>
+                                <td>{{ $Sub->customer->name }}</td>
                                 <td>{{ $Sub->plan->name }}</td>
                                 <td>{{ $Sub->plan_type }}</td>
                                 <td>{{ $Sub->status }}</td>
-
+                                <td>{{ $Sub->price }}</td>
+                                <td>{{ $Sub->plan->plan_description }}</td>
                                 <td>{{ $Sub->current_period_start }}</td>
                                 <td>{{ $Sub->current_period_end }}</td>
-                                @if ($Sub->status == 'active')
+                                {{--  @if ($Sub->status == 'active')
                                 <td><a href="{{ route('cancel.user.sub',$Sub->User->id) }}" class="btn btn-danger">Cancel Subscription</a></td>
-                                @endif
+                                @endif  --}}
+
+
+
                             </tr>
                         @endforeach
                         @else

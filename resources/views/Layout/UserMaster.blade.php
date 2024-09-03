@@ -40,6 +40,8 @@
     </style>
 </head>
 <body>
+    @if (!isset($noheader))
+
     <header class="full-width-header">
         <div class="container">
             <div class="row">
@@ -50,6 +52,8 @@
                             <li class="nav-item"><a class="nav-link" href="{{ route('Add.products') }}">Add Products</a></li>
                             <li class="nav-item"><a class="nav-link" href="{{ route('add.plans.form') }}">Add Plans</a></li>
                             <li class="nav-item"><a class="nav-link" href="{{ route('add.customer.form') }}">Add Customer</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('add.subscription.form') }}">Add Subscriptions</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('subscriptions.index') }}">My Subscriptions</a></li>
 
                             <li class="nav-item"><a class="nav-link" href="{{ route('account') }}">Account</a></li>
                         </ul>
@@ -58,6 +62,8 @@
             </div>
         </div>
     </header>
+    @include('Layout/UserNav')
+@endif
 
     @if (!isset($noNavbar))
         @include('Layout/UserNav')

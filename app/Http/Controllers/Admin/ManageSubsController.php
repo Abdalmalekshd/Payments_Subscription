@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\User;
 use App\Models\User_Product;
@@ -29,13 +30,13 @@ class ManageSubsController extends Controller
 
 
 
-     public function manageProductssubs(){
+     public function managePlans(){
 
         $data=[];
-        $data['User_products']=User_Product::get();
+         $data['plans']=Plan::get();
 
 
-        return view('Admin.ManageProductSubs',$data);
+        return view('Admin.ManagePlans',$data);
      }
 
 

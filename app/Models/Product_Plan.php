@@ -15,7 +15,7 @@ class Product_Plan extends Model
     public $guarded=[];
 
 
-    public function productsplans(){
+    public function product(){
         return $this->belongsTo(Product::class);
         }
 

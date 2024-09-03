@@ -19,7 +19,7 @@
                         <a class="nav-link" href="{{ route('account') }}">ACCOUNT</a>
                         <a class="nav-link" href="{{ route('subscriptions') }}">SUBSCRIPTIONS</a>
                         <a class="nav-link" href="{{ route('update_payments') }}">UPDATE PAYMENT</a>
-                        <a class="nav-link" href="{{ route('product.subscription') }}">Products Subscriptions</a>
+                        <a class="nav-link" href="{{ route('Manage.Plans') }}">MANAGE MY PLANS</a>
                         <a class="nav-link" href="{{ route('receipts') }}">RECEIPTS</a>
                         <a class="nav-link" href="{{ route('cancel_sub') }}">CANCEL SUBSCRIPTION</a>
                     </nav>

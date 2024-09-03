@@ -2,6 +2,9 @@
 
 namespace App\Jobs;
 
+use App\Models\PlanPrice;
+use App\Models\Product;
+use App\Models\Product_Plan;
 use App\Models\Subscription;
 use DB;
 use Stripe\StripeClient;
@@ -23,77 +26,123 @@ use Illuminate\Support\Facades\Log;class ChargeUserSubscription implements Shoul
     }
 
     public function handle()
-    {
-        $stripeSecretKey = config('services.stripe.sk');
-        if (!$stripeSecretKey) {
-            Log::error('Stripe secret key not configured.');
-            return;
+{
+    $stripeSecretKey = config('services.stripe.sk');
+    if (!$stripeSecretKey) {
+        Log::error('Stripe secret key not configured.');
+        return;
+    }
+
+    $stripeClient = new \Stripe\StripeClient($stripeSecretKey);
+
+    try {
+        DB::beginTransaction();
+
+
+        $subscriptionId = $this->subscription->subscription_id;
+        $stripeSubscription = $stripeClient->subscriptions->retrieve($subscriptionId);
+
+        // Retrieve associated products for the plan
+        $products = Product_Plan::where('plan_id', $this->subscription->plan_id)->get();
+
+        $amountInCents = 0;
+
+        // Add each product's price to the total amount
+        foreach ($products as $productPlan) {
+            $product = Product::find($productPlan->product_id);
+            $productPriceInCents = $product->price * 100; // Convert to cents
+            $amountInCents += $productPriceInCents;
         }
 
-        $stripeClient = new \Stripe\StripeClient($stripeSecretKey);
 
-        try {
-            DB::beginTransaction();
-            // Retrieve the subscription from Stripe
-            $subscriptionId = $this->subscription->subscription_id;
-            $stripeSubscription = $stripeClient->subscriptions->retrieve($subscriptionId);
+        $planPrice = PlanPrice::where(function($query) {
+            $query->where('plan_type', $this->subscription->plan_type)
+                  ->where('plan_id', $this->subscription->plan_id);
+        })->first();
 
-            // Retrieve the price details
-            $priceId = $this->subscription->stripe_price_id; // Get the price_id from the subscription
-            $price = $stripeClient->prices->retrieve($priceId);
+        $amountInCents += $planPrice->price * 100;
 
-            // Amount in cents
-            $amountInCents = max($price->unit_amount, 50); // Minimum amount in cents
 
-            // Create a PaymentIntent
-            $paymentIntent = $stripeClient->paymentIntents->create([
-                'amount' => $amountInCents,
-                'currency' => $price->currency,
-                'customer' => $stripeSubscription->customer,
-                'payment_method' => $stripeSubscription->default_payment_method,
-                'off_session' => true,
-                'confirm' => true,
+        if ($planPrice && $planPrice->discount && $planPrice->discount_limit >= now()) {
+            if ($planPrice->discount_type === 'fixed') {
+                $discountAmountInCents = $planPrice->discount * 100; // Convert to cents
+                $amountInCents = max($amountInCents - $discountAmountInCents, 50); // Apply fixed discount
+            } elseif ($planPrice->discount_type === 'percentage') {
+                $discountAmountInCents = $amountInCents * ($planPrice->discount / 100); // Apply percentage discount
+                $amountInCents = max($amountInCents - $discountAmountInCents, 50); // Ensure at least 50 cents
+            }
+        }
+
+        // Create a new price in Stripe with the calculated amount
+        $newPrice = $stripeClient->prices->create([
+            'unit_amount' => $amountInCents,
+            'currency' => $stripeSubscription->currency,
+            'recurring' => [
+                'interval' => $this->subscription->plan_type, // 'day', 'week', 'month', 'year'
+            ],
+            'product' => $stripeSubscription->items->data[0]->price->product,
+        ]);
+
+        // Create a PaymentIntent with the new total price after discount
+        $paymentIntent = $stripeClient->paymentIntents->create([
+            'amount' => $amountInCents,
+            'currency' => $stripeSubscription->currency,
+            'customer' => $stripeSubscription->customer,
+            'payment_method' => $stripeSubscription->default_payment_method,
+            'off_session' => true,
+            'confirm' => true,
+        ]);
+
+        if ($paymentIntent->status === 'succeeded') {
+            // Update current subscription to expired
+            $this->subscription->update([
+                'status' => 'expired',
             ]);
 
-            if ($paymentIntent->status === 'succeeded') {
-                // Update current subscription to expired
-                $this->subscription->update([
-                    'status' => 'expired',
-                ]);
-
-                // Create a new subscription
-                $newSubscription = $stripeClient->subscriptions->create([
-                    'customer' => $stripeSubscription->customer,
-                    'items' => [['price' => $priceId]],
-                    'default_payment_method' => $stripeSubscription->default_payment_method,
-                ]);
+            // Update the subscription in Stripe with the new price
+            $stripeClient->subscriptions->update($subscriptionId, [
+                'items' => [
+                    [
+                        'id' => $stripeSubscription->items->data[0]->id,
+                        'price' => $newPrice->id, // Use the new price ID
+                    ],
+                ],
+                'proration_behavior' => 'create_prorations',
+            ]);
 
 
+            $current_period_end = match ($this->subscription->plan_type) {
+                'day' => now()->addDay(),
+                'week' => now()->addWeek(),
+                'month' => now()->addMonth(),
+                default => now()->addYear(),
+            };
 
-                // Save the new subscription details in the database
-                Subscription::create([
-                    'user_id' => $this->subscription->user->id,
-                    'plan_id' =>$this->subscription->plan_id,
-                    'status' => 'active',
-                    'plan_type' => $this->subscription->plan_type,
-                    'current_period_start' => now(),
-                    'current_period_end' => $this->subscription->plan_type === 'year' ? now()->addYear() : now()->addMonth(),
-                    'subscription_id' => $newSubscription->id,
-                    'stripe_price_id' => $priceId,
-                ]);
-                DB::commit();
-                Log::info('Subscription charged and renewed successfully: ' . $newSubscription->id);
-            } else {
-                $this->subscription->update([
-                    'status' => 'past_due',
-                ]);
-                Log::error('Payment failed for subscription: ' . $this->subscription->id);
-            }
-        } catch (\Stripe\Exception\ApiErrorException $e) {
-            DB::rollback();
-            Log::error('Stripe API Error: ' . $e->getMessage());
+            // Save the new subscription details in the database
+            Subscription::create([
+                'user_id' => $this->subscription->user->id,
+                'customer_id' => $this->subscription->customer->id,
+                'plan_id' => $this->subscription->plan_id,
+                'price' => $amountInCents / 100, // Store the actual total price after discount
+                'status' => 'active',
+                'plan_type' => $this->subscription->plan_type,
+                'current_period_start' => now(),
+                'current_period_end' => $current_period_end,
+                'subscription_id' => $this->subscription->subscription_id,
+                'stripe_price_id' => $newPrice->id,
+            ]);
+
+            DB::commit();
+            Log::info('Subscription charged and renewed successfully: ' . $this->subscription->id);
+
+        } else {
+            Log::error('Payment failed for subscription: ' . $this->subscription->id);
         }
-
+    } catch (\Stripe\Exception\ApiErrorException $e) {
+        DB::rollback();
+        Log::error('Stripe API Error: ' . $e->getMessage());
     }
+}
+
 
 }

@@ -19,7 +19,8 @@
                         <a class="nav-link" href="{{ route('account') }}">ACCOUNT</a>
                         <a class="nav-link active" href="{{ route('subscriptions') }}">SUBSCRIPTIONS</a>
                         <a class="nav-link" href="{{ route('update_payments') }}">UPDATE PAYMENT</a>
-                        <a class="nav-link" href="{{ route('product.subscription') }}">Products Subscriptions</a>
+                        <a class="nav-link" href="{{ route('Manage.Plans') }}">MANAGE MY PLANS</a>
+
 
                         <a class="nav-link" href="{{ route('receipts') }}">RECEIPTS</a>
                         <a class="nav-link" href="{{ route('cancel_sub') }}">CANCEL SUBSCRIPTION</a>
@@ -43,9 +44,9 @@
                     <div class="row">
                         <div class="col-md-12 text-center">
                             <div class="mb-4">
-                                <form id="planForm" method="post" action="{{ route('process.payment') }}">
-                                    @csrf
-                                    
+                                {{--  <form id="planForm" method="post" action="{{ route('process.payment') }}">  --}}
+                                    {{--  @csrf  --}}
+
                                     <span class="span">
                                         <input type="radio" name="plan_type" value="daily">
                                         DAILY

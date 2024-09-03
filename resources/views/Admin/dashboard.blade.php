@@ -14,8 +14,7 @@
                     <nav class="nav flex-column">
                         <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
                         <a class="nav-link" href="{{ route('manage.subs') }}">MANAGE SUBSCRIPTIONS</a>
-                        <a class="nav-link" href="{{ route('manage.products.subs') }}">MANAGE PRODUCTS SUBSCRIPTIONS</a>
-
+                        <a class="nav-link" href="{{ route('manage.plans') }}">MANAGE PLANS</a>
                         <a class="nav-link" href="{{ route('manage.users') }}">MANAGE USERS</a>
                         <a class="nav-link" href="{{ route('admin.settings') }}">Settings</a>
 
@@ -29,31 +28,65 @@
                             <h3 class="TITLE">Dashboard</h3>
                         </div>
                     </div>
+
+
+
                     <div class="row mb-3">
+
                         <div class="col-md-6">
-                    <div class="card text-center bg-warning">
+                            <div class="card text-center bg-warning">
+                                <h3>Total Plans</h3>
+                                {{ $CountPlans }}
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-6">
+                    <div class="card text-center bg-info">
                         <h3>Total Users</h3>
                         {{ $CountUsers }}
                     </div>
                 </div>
+            </div>
+
+            <div class="row mb-3">
                 <div class="col-md-6">
 
                     <div class="card text-center bg-success">
                         <h3>Active Subscriptions</h3>
                         {{ $CountSubs }} </div>
                 </div>
+
+
+                    <div class="col-md-6">
+                <div class="card text-center bg-primary">
+                    <h3>Pending Subscriptions</h3>
+                    {{ $CountPendingSubs }}
                 </div>
+            </div>
+        </div>
 
-
-                <div class="row">
-                    <div class="col-md-12">
-                <div class="card text-center bg-danger">
-                    <h3>canceled Subscriptions</h3>
-                    {{ $CountCancelSubs }}
+            <div class="row mb-3">
+                    <div class="col-md-6">
+                <div class="card text-center bg-secondary">
+                    <h3>Paused Subscriptions</h3>
+                    {{ $CountPausedSubs }}
                 </div>
             </div>
 
+
+        <div class="col-md-6">
+            <div class="card text-center bg-danger">
+                <h3>Canceled Subscriptions</h3>
+                {{ $CountCancelSubs }}
             </div>
+        </div>
+
+    </div>
+
+
+
+
 
             <div class="row mt-3">
                 <div class="col-md-12">

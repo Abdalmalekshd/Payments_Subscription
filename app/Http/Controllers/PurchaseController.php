@@ -22,7 +22,9 @@ class PurchaseController extends Controller
         $purchaseType = $req->input('purchase_type'); // 'one_time', 'weekly', 'monthly', 'yearly'
 
     if (!$product) {
-        return response()->json(['error' => 'Product not found'], 404);
+        // return response()->json(['error' => 'Product not found'], 404);
+        abort(404,'Not Found');
+
     }
 
 
@@ -82,6 +84,7 @@ class PurchaseController extends Controller
 
         return redirect()->away($session->url);
     } catch (\Stripe\Exception\ApiErrorException $e) {
+        return $e;
         return response()->json(['error' => $e->getMessage()], 500);
     }
 

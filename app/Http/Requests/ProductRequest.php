@@ -24,11 +24,13 @@ class ProductRequest extends FormRequest
     public function rules()
     {
         return [
-            'name'          =>'required|min:3',
-            'description'   =>'required|min:10',
-            'image'         =>'required|mimes:png,jpg',
-            'price'         =>'required|numeric',
-            'quantity'      =>'required|numeric',
+            'name'                  =>'required|min:3',
+            'description'           =>'required|min:10',
+            'image'                 =>'required|mimes:png,jpg',
+            'price'                 =>'required|numeric',
+            'quantity'              =>'required|numeric',
+            'composited_products'   =>'required|array|min:1',
+            'composited_quantities' =>'required|array|min:1|required_if:is_comopsite,on',
 
         ];
     }
